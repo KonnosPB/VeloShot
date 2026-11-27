@@ -12,7 +12,7 @@ Ein schnelles, flüssiges Screenshot-Werkzeug in **Rust** mit **GTK4 + Libadwait
 
 ### Funktionen
 
-- **Greenshot-ähnliche Bereichsaufnahme & schwebende Mini-Leiste:** GPU-gerendertes Vollbild-Overlay über `xdg-desktop-portal` (`ashpd`) mit Vollbild-Fadenkreuz, **6×-Live-Lupe** und transparenter Mini-Leiste (**Auswahl**, **Monitor-Auswahl** mit Live-Hervorhebung, **Fenster** über GNOME-Portal, **3s/5s-Timer** sowie **Oben/Unten-Wechsel**), die beim Ziehen automatisch ausgeblendet wird.
+- **Präzise Bereichsaufnahme & schwebende Mini-Leiste:** GPU-gerendertes Vollbild-Overlay über `xdg-desktop-portal` (`ashpd`) mit Vollbild-Fadenkreuz, **6×-Live-Lupe** und transparenter Mini-Leiste (**Auswahl**, **Monitor-Auswahl** mit Live-Hervorhebung, **Fenster** über GNOME-Portal, **3s/5s-Timer** sowie **Oben/Unten-Wechsel**), die beim Ziehen automatisch ausgeblendet wird.
 - **Interaktives 60+ FPS Verlaufs-Karussell:** Große Live-Vorschau mit **5 % transparentem Außenrand**, Datum und Metadaten kompakt unten links, animiertem Oben/Unten-Wechsel und flüssiger Steuerung per Tastatur, Mausrad oder Trackpad. Konfigurierbare Position: **Oben**, **Unten** oder **Zentral**.
 - **Integrierter Annotations- & Bearbeitungs-Editor:**
   - **Auswählen & Verschieben** (`V`, `Entf` zum Löschen, Doppelklick auf Text/Sprechblase zum direkten Nachbearbeiten)
@@ -88,7 +88,7 @@ A fast, fluid screenshot tool written in **Rust** with **GTK4 + Libadwaita**, sp
 
 ### Features
 
-- **Greenshot-Style Region Capture & Floating Mini-Bar:** Fullscreen GPU-rendered overlay via `xdg-desktop-portal` (`ashpd`) with full-screen crosshair, **6× live zoom loupe**, and a translucent floating mini-bar (**Selection**, per-**Monitor** picker with live hover highlight, **Window** via GNOME portal, **3s/5s** timer, and **Top/Bottom** flip) that auto-fades while dragging.
+- **Precision Region Capture & Floating Mini-Bar:** Fullscreen GPU-rendered overlay via `xdg-desktop-portal` (`ashpd`) with full-screen crosshair, **6× live zoom loupe**, and a translucent floating mini-bar (**Selection**, per-**Monitor** picker with live hover highlight, **Window** via GNOME portal, **3s/5s** timer, and **Top/Bottom** flip) that auto-fades while dragging.
 - **Interactive 60+ FPS Carousel History:** Full-size live preview with a **5% translucent outer border**, date and metadata neatly grouped at the bottom-left, animated top/bottom dock flip, and smooth keyboard/wheel/trackpad browsing. Configurable placement: **Top**, **Bottom**, or **Center**.
 - **Built-in Annotation & Manipulation Studio:**
   - **Select & Move** (`V`, `Delete` to remove selected object, double-click Text/Speech Bubble for inline editing)

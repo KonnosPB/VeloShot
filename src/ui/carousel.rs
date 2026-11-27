@@ -88,16 +88,16 @@ pub fn open_carousel(state: AppState) {
     let cstate = Rc::new(RefCell::new(CarouselState::new(items)));
 
     let toast_overlay = adw::ToastOverlay::new();
-    let window = adw::ApplicationWindow::builder()
+    let window = gtk4::ApplicationWindow::builder()
         .application(&state.app)
         .title(tr(
             "Verlauf-Karussell — VeloShot",
             "Carousel History — VeloShot",
         ))
         .decorated(false)
-        .fullscreened(true)
+        .maximized(true)
         .css_classes(["overlay-window"])
-        .content(&toast_overlay)
+        .child(&toast_overlay)
         .build();
 
     let (outer_x, outer_y) = compute_outer_margins();

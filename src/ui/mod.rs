@@ -46,16 +46,20 @@ pub fn install_css() {
     let provider = CssProvider::new();
     let mut css = String::from(
         r#"
-        window.overlay-window {
+        window.overlay-window,
+        window.overlay-window.background,
+        window.overlay-window toastoverlay {
             background-color: transparent;
+            background-image: none;
+            box-shadow: none;
         }
         .carousel-backdrop {
-            background-color: rgba(10, 12, 18, 0.34);
+            background-color: rgba(0, 0, 0, 0.60);
             transition: background-color 220ms ease;
         }
         .carousel-dock {
-            background-color: rgba(28, 28, 34, 0.88);
-            border: 1px solid rgba(255, 255, 255, 0.16);
+            background-color: #1c1c22;
+            border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 18px;
             box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
             color: #f3f4f6;
@@ -91,7 +95,7 @@ pub fn install_css() {
             opacity: 0.88;
         }
         .carousel-preview-card {
-            background-color: rgba(24, 26, 33, 0.88);
+            background-color: #181a21;
             border: 1px solid rgba(255, 255, 255, 0.14);
             border-radius: 18px;
             box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
@@ -105,8 +109,8 @@ pub fn install_css() {
             font-variant-numeric: tabular-nums;
         }
         button.color-swatch {
-            min-width: 26px;
-            min-height: 26px;
+            min-width: 22px;
+            min-height: 22px;
             padding: 0;
             border-radius: 999px;
             border: 2px solid rgba(255, 255, 255, 0.35);
@@ -118,6 +122,29 @@ pub fn install_css() {
         button.color-swatch.active-swatch {
             border: 2.5px solid #3584e4;
             box-shadow: 0 0 0 2px rgba(53, 132, 228, 0.35);
+        }
+        .editor-subbar {
+            min-height: 0;
+        }
+        .editor-subbar spinbutton,
+        .editor-subbar spinbutton > text,
+        .editor-subbar spinbutton > button,
+        .editor-subbar button,
+        .editor-subbar menubutton > button,
+        .editor-subbar .linked > button {
+            min-height: 26px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+        }
+        .editor-subbar spinbutton > button {
+            min-width: 24px;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+        .editor-subbar button.color-swatch {
+            min-width: 22px;
+            min-height: 22px;
+            padding: 0;
         }
         .swatch-chip {
             min-width: 18px;
@@ -280,7 +307,7 @@ pub fn plain_toast(message: &str) -> adw::Toast {
     adw::Toast::new(&gtk4::glib::markup_escape_text(message))
 }
 
-/// Starts a Greenshot-style capture flow and executes the configured post-capture action.
+/// Starts a interactive capture flow and executes the configured post-capture action.
 pub fn trigger_capture_flow(state: AppState, parent_to_hide: Option<gtk4::Window>) {
     if let Some(win) = &parent_to_hide {
         win.set_visible(false);
@@ -323,7 +350,7 @@ pub fn trigger_interactive_capture(state: AppState) {
     });
 }
 
-/// Waits `delay_secs` seconds and then opens the Greenshot-style region overlay.
+/// Waits `delay_secs` seconds and then opens the interactive region overlay.
 pub fn trigger_delayed_capture(state: AppState, delay_secs: u64) {
     let rx = crate::capture::spawn_delayed_capture_async(delay_secs);
     gtk4::glib::MainContext::default().spawn_local(async move {

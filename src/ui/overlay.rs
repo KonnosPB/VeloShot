@@ -1,4 +1,4 @@
-//! Greenshot-style fullscreen region selector rendered on GPU via GTK4 Snapshot/GSK,
+//! interactive fullscreen region selector rendered on GPU via GTK4 Snapshot/GSK,
 //! paired with an animated frosted-glass capture mini-bar that auto-fades during drag,
 //! springs smoothly between top/bottom, and is guaranteed never to appear in the screenshot.
 
@@ -166,7 +166,7 @@ mod imp {
             snapshot.append_color(&cross_color, &graphene::Rect::new(cx_line, 0.0, 1.0, h));
             snapshot.append_color(&cross_color, &graphene::Rect::new(0.0, cy_line, w, 1.0));
 
-            // 4. Greenshot-style 6x GPU live loupe & pixel HUD
+            // 4. interactive 6x GPU live loupe & pixel HUD
             let scale_x = img_w / w as f64;
             let scale_y = img_h / h as f64;
             let img_cx = (mx * scale_x).clamp(0.0, img_w - 1.0);
@@ -390,7 +390,7 @@ fn discover_monitor_slices() -> Vec<MonitorSlice> {
         .collect()
 }
 
-/// Opens the fullscreen Greenshot-style selection overlay on top of the frozen screenshot.
+/// Opens the fullscreen interactive selection overlay on top of the frozen screenshot.
 pub fn open_region_overlay(state: AppState, full_img: RgbaImage) {
     let canvas = OverlayCanvas::new(&full_img);
     let img_rc = Rc::new(full_img);

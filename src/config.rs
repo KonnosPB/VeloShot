@@ -249,14 +249,6 @@ impl EditorIconSize {
         }
     }
 
-    pub fn subbar_px(self) -> i32 {
-        match self {
-            EditorIconSize::Small => 16,
-            EditorIconSize::Medium => 20,
-            EditorIconSize::Large => 26,
-        }
-    }
-
     pub fn css_class(self) -> &'static str {
         match self {
             EditorIconSize::Small => "tool-size-small",

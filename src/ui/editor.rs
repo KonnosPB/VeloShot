@@ -12,8 +12,8 @@ use libadwaita as adw;
 use crate::annotations::{
     Annotation, AnnotationStack, AnnotationTool, BeautifyStyle, Color, apply_all_blurs,
     draw_beautify_backdrop_and_clip, draw_rounded_rect, draw_selection_box,
-    draw_vector_annotations, normalize_rect, render_final_image_with_beautify,
-    rgba_to_cairo_surface,
+    draw_vector_annotations, expand_image_to_fit_bounds, normalize_rect,
+    render_final_image_with_beautify, rgba_to_cairo_surface,
 };
 use crate::capture::crop_region;
 use crate::clipboard::{copy_rgba_to_clipboard, copy_text_to_clipboard};
@@ -127,6 +127,44 @@ impl EditorState {
             .max(100.0) as i32;
         (w, h)
     }
+
+    fn expand_canvas_for_bubble(&mut self, index: usize, push_undo: bool) -> bool {
+        let Some((min_x, min_y, max_x, max_y)) = self
+            .stack
+            .items
+            .get(index)
+            .and_then(|a| a.speech_bubble_bounds())
+        else {
+            return false;
+        };
+        let pre_snap = if push_undo {
+            Some(self.current_snapshot())
+        } else {
+            None
+        };
+        if let Some(expanded) = expand_image_to_fit_bounds(
+            &self.base_img,
+            &mut self.stack.items,
+            min_x,
+            min_y,
+            max_x,
+            max_y,
+            16.0,
+        ) {
+            if let Some(snap) = pre_snap {
+                if self.undo_snapshots.len() >= 40 {
+                    self.undo_snapshots.remove(0);
+                }
+                self.undo_snapshots.push(snap);
+                self.redo_snapshots.clear();
+            }
+            self.base_img = expanded;
+            self.rebuild_blurred_surface();
+            true
+        } else {
+            false
+        }
+    }
 }
 
 /// Opens the annotation editor for `image` (optionally linked to a `HistoryItem`).
@@ -182,7 +220,6 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
     let hdr_px = icon_size.header_px();
     let tool_px = icon_size.tool_px();
     let tool_size_cls = icon_size.css_class();
-    let sub_px = icon_size.subbar_px();
     let sidebar_pad = match icon_size {
         crate::config::EditorIconSize::Small => 4,
         crate::config::EditorIconSize::Medium => 8,
@@ -397,11 +434,12 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
     // --- Style & Effects Strip: Colors, Sizes, Beautify Frame, Rotate/Flip, Zoom ---
     let subbar = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
+        .spacing(6)
         .margin_start(12)
         .margin_end(12)
-        .margin_top(6)
-        .margin_bottom(6)
+        .margin_top(3)
+        .margin_bottom(3)
+        .css_classes(["editor-subbar"])
         .build();
 
     let mut swatch_buttons: Vec<(Color, gtk4::Button)> = Vec::new();
@@ -409,6 +447,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         let swatch_cls = format!("swatch-{idx}");
         let btn = gtk4::Button::builder()
             .tooltip_text(Color::palette_label(idx))
+            .valign(gtk4::Align::Center)
             .css_classes(if idx == 0 {
                 vec!["color-swatch", &swatch_cls, "active-swatch"]
             } else {
@@ -466,6 +505,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
     subbar.append(&size_icon);
     let size_spin = gtk4::SpinButton::with_range(1.0, 64.0, 1.0);
     size_spin.set_value(4.0);
+    size_spin.set_valign(gtk4::Align::Center);
     size_spin.set_tooltip_text(Some(tr("Linien- & Schriftstärke", "Stroke & font size")));
     {
         let ed_size = Rc::clone(&ed);
@@ -495,6 +535,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
     subbar.append(&blur_icon);
     let blur_spin = gtk4::SpinButton::with_range(6.0, 48.0, 2.0);
     blur_spin.set_value(14.0);
+    blur_spin.set_valign(gtk4::Align::Center);
     blur_spin.set_tooltip_text(Some(tr("Verpixelungsstärke", "Pixelation strength")));
     {
         let ed_blur = Rc::clone(&ed);
@@ -614,6 +655,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         .child(&fill_btn_content)
         .popover(&fill_popover)
         .tooltip_text(fill_tooltip)
+        .valign(gtk4::Align::Center)
         .build();
     subbar.append(&fill_menu_btn);
 
@@ -630,9 +672,9 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
     frame_btn_content.append(&frame_preview_chip);
 
     let frame_popover = gtk4::Popover::new();
-    let frame_swatch_box = gtk4::Box::builder()
-        .orientation(gtk4::Orientation::Horizontal)
-        .spacing(8)
+    let frame_grid = gtk4::Grid::builder()
+        .row_spacing(6)
+        .column_spacing(6)
         .margin_top(8)
         .margin_bottom(8)
         .margin_start(8)
@@ -649,34 +691,34 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                 vec!["color-swatch", &swatch_cls]
             })
             .build();
-        frame_swatch_box.append(&btn);
+        frame_grid.attach(&btn, (idx % 5) as i32, (idx / 5) as i32, 1, 1);
         frame_buttons.push(btn);
     }
-    frame_popover.set_child(Some(&frame_swatch_box));
+    frame_popover.set_child(Some(&frame_grid));
     let frame_buttons_rc = Rc::new(frame_buttons);
     let frame_menu_btn = gtk4::MenuButton::builder()
         .child(&frame_btn_content)
         .popover(&frame_popover)
         .tooltip_text(frame_tooltip)
+        .valign(gtk4::Align::Center)
         .build();
     subbar.append(&frame_menu_btn);
 
     let transform_box = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Horizontal)
+        .valign(gtk4::Align::Center)
         .css_classes(["linked"])
         .build();
     let rotate_btn = gtk4::Button::builder()
-        .child(&icons::icon_image("jas-rotate", sub_px))
+        .child(&icons::icon_image("jas-rotate", 18))
         .tooltip_text(tr(
             "Bild um 90° im Uhrzeigersinn drehen",
             "Rotate image 90° clockwise",
         ))
-        .css_classes(["editor-bar-btn", tool_size_cls])
         .build();
     let flip_btn = gtk4::Button::builder()
-        .child(&icons::icon_image("jas-flip", sub_px))
+        .child(&icons::icon_image("jas-flip", 18))
         .tooltip_text(tr("Bild horizontal spiegeln", "Flip image horizontally"))
-        .css_classes(["editor-bar-btn", tool_size_cls])
         .build();
     transform_box.append(&rotate_btn);
     transform_box.append(&flip_btn);
@@ -686,6 +728,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         .orientation(gtk4::Orientation::Horizontal)
         .hexpand(true)
         .halign(gtk4::Align::End)
+        .valign(gtk4::Align::Center)
         .css_classes(["linked"])
         .build();
     let zoom_out_btn = gtk4::Button::builder()
@@ -960,6 +1003,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         let popover = popover.clone();
         let area = drawing_area.clone();
         let sync_history_btns = sync_history_btns.clone();
+        let sync_canvas_size = sync_canvas_size.clone();
         move || {
             let text = pop_entry.text().trim().to_string();
             popover.popdown();
@@ -1022,9 +1066,15 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                             text_color: fill_color.contrast_text_color(),
                             font_size,
                         });
+                        let new_idx = st.stack.items.len() - 1;
+                        let expanded = st.expand_canvas_for_bubble(new_idx, false);
                         drop(st);
                         sync_history_btns();
-                        area.queue_draw();
+                        if expanded {
+                            sync_canvas_size();
+                        } else {
+                            area.queue_draw();
+                        }
                     }
                 }
             }
@@ -1330,6 +1380,14 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                 AnnotationTool::Select => {
                     st.move_last_pos = None;
                     st.dragging_tail = false;
+                    if let Some(idx) = st.selected_index
+                        && st.expand_canvas_for_bubble(idx, true)
+                    {
+                        drop(st);
+                        sync_history_btns();
+                        sync_canvas_size();
+                        return;
+                    }
                 }
                 AnnotationTool::Rectangle if nw >= 4.0 && nh >= 4.0 => {
                     st.push_undo_snapshot();
@@ -1890,15 +1948,35 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
     if state.config.borrow().auto_copy_clipboard {
         let ed_clip = Rc::clone(&ed);
         let copied_once = Rc::new(Cell::new(false));
-        window.connect_is_active_notify(move |win| {
-            if win.is_active() && !copied_once.get() {
-                copied_once.set(true);
-                let _ = copy_rgba_to_clipboard(&ed_clip.borrow().base_img);
+        let schedule_initial_copy = {
+            let ed_c = Rc::clone(&ed_clip);
+            let done = Rc::clone(&copied_once);
+            move || {
+                if done.get() {
+                    return;
+                }
+                done.set(true);
+                let ed_delayed = Rc::clone(&ed_c);
+                glib::timeout_add_local_once(std::time::Duration::from_millis(80), move || {
+                    let _ = copy_rgba_to_clipboard(&ed_delayed.borrow().base_img);
+                });
             }
-        });
+        };
+        {
+            let trigger = schedule_initial_copy.clone();
+            window.connect_is_active_notify(move |win| {
+                if win.is_active() {
+                    trigger();
+                }
+            });
+        }
+        window.present();
+        if window.is_active() {
+            schedule_initial_copy();
+        }
+    } else {
+        window.present();
     }
-
-    window.present();
     let sidebar_enter = tool_scroller.clone();
     glib::timeout_add_local_once(std::time::Duration::from_millis(16), move || {
         sidebar_enter.remove_css_class("entering-left");

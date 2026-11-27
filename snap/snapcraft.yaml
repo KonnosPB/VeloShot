@@ -3,7 +3,7 @@ base: core24
 version: "0.1.0"
 summary: Schnelles Ubuntu-Wayland-Screenshot-Tool mit Verlaufs-Karussell
 description: |
-  VeloShot bietet unter Ubuntu Wayland (GNOME) eine Greenshot-ähnliche
+  VeloShot bietet unter Ubuntu Wayland (GNOME) eine präzise
   Bereichsauswahl mit Live-Lupe, eine konfigurierbare Screenshot-Historie mit
   flüssigem Karussell (Oben, Unten, Links, Rechts, Zentral) sowie einen
   integrierten Nachbearbeitungs-Editor (Rechteck, Text, Sprechblase, Verwischen).

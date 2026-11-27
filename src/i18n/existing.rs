@@ -37,6 +37,11 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "GNOME Blue" => pick(lang, "Μπλε GNOME", "Bleu GNOME", "Azul GNOME", "GNOME-blauw", "Blu GNOME"),
         "Sunset" => pick(lang, "Ηλιοβασίλεμα", "Coucher de soleil", "Atardecer", "Zonsondergang", "Tramonto"),
         "Dark Slate" => pick(lang, "Σκούρος σχιστόλιθος", "Ardoise sombre", "Pizarra oscura", "Donkerleigrijs", "Ardesia scura"),
+        "Aurora" => pick(lang, "Αυγή", "Aurore", "Aurora", "Noorderlicht", "Aurora"),
+        "Rose" => pick(lang, "Ροζ", "Rose", "Rosa", "Roze", "Rosa"),
+        "Ocean" => pick(lang, "Ωκεανός", "Océan", "Océano", "Oceaan", "Oceano"),
+        "Amber" => pick(lang, "Κεχριμπάρι", "Ambre", "Ámbar", "Amber", "Ambra"),
+        "Pearl (Light)" => pick(lang, "Μαργαριτάρι (Ανοιχτό)", "Perle (Clair)", "Perla (Claro)", "Parel (Licht)", "Perla (Chiaro)"),
 
         // --- Config Enums ---
         "Automatic (System)" => pick(

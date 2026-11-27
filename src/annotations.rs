@@ -120,15 +120,25 @@ pub enum BeautifyStyle {
     Sunset,
     SlateDark,
     Mint,
+    Aurora,
+    Rose,
+    Ocean,
+    Amber,
+    Pearl,
 }
 
 impl BeautifyStyle {
-    pub const ALL: [BeautifyStyle; 5] = [
+    pub const ALL: [BeautifyStyle; 10] = [
         BeautifyStyle::None,
         BeautifyStyle::GnomeBlue,
         BeautifyStyle::Sunset,
         BeautifyStyle::SlateDark,
         BeautifyStyle::Mint,
+        BeautifyStyle::Aurora,
+        BeautifyStyle::Rose,
+        BeautifyStyle::Ocean,
+        BeautifyStyle::Amber,
+        BeautifyStyle::Pearl,
     ];
 
     pub fn label(self) -> &'static str {
@@ -138,6 +148,11 @@ impl BeautifyStyle {
             BeautifyStyle::Sunset => tr("Sonnenuntergang", "Sunset"),
             BeautifyStyle::SlateDark => tr("Dunkel-Schiefer", "Dark Slate"),
             BeautifyStyle::Mint => "Mint",
+            BeautifyStyle::Aurora => tr("Aurora", "Aurora"),
+            BeautifyStyle::Rose => tr("Rosé", "Rose"),
+            BeautifyStyle::Ocean => tr("Ozean", "Ocean"),
+            BeautifyStyle::Amber => tr("Bernstein", "Amber"),
+            BeautifyStyle::Pearl => tr("Perle (Hell)", "Pearl (Light)"),
         }
     }
 
@@ -159,6 +174,11 @@ impl BeautifyStyle {
             BeautifyStyle::Sunset => ((0.94, 0.36, 0.28), (0.96, 0.68, 0.22)),
             BeautifyStyle::SlateDark => ((0.13, 0.16, 0.22), (0.24, 0.29, 0.38)),
             BeautifyStyle::Mint => ((0.12, 0.68, 0.56), (0.20, 0.50, 0.82)),
+            BeautifyStyle::Aurora => ((0.06, 0.72, 0.51), (0.39, 0.40, 0.95)),
+            BeautifyStyle::Rose => ((0.93, 0.28, 0.60), (0.55, 0.36, 0.96)),
+            BeautifyStyle::Ocean => ((0.05, 0.65, 0.91), (0.12, 0.23, 0.54)),
+            BeautifyStyle::Amber => ((0.96, 0.62, 0.04), (0.94, 0.27, 0.27)),
+            BeautifyStyle::Pearl => ((0.95, 0.96, 0.98), (0.80, 0.84, 0.89)),
         }
     }
 }
@@ -542,6 +562,32 @@ impl Annotation {
                 true
             }
             _ => false,
+        }
+    }
+
+    /// Returns `(min_x, min_y, max_x, max_y)` including the tail if `self` is a `SpeechBubble`.
+    pub fn speech_bubble_bounds(&self) -> Option<(f64, f64, f64, f64)> {
+        if let Annotation::SpeechBubble {
+            x,
+            y,
+            w,
+            h,
+            tail_x,
+            tail_y,
+            ..
+        } = self
+        {
+            let (nx, ny, nw, nh) = normalize_rect(*x, *y, *w, *h);
+            let bw = nw.max(48.0);
+            let bh = nh.max(32.0);
+            Some((
+                nx.min(*tail_x) - 4.0,
+                ny.min(*tail_y) - 4.0,
+                (nx + bw).max(*tail_x) + 4.0,
+                (ny + bh).max(*tail_y) + 4.0,
+            ))
+        } else {
+            None
         }
     }
 
@@ -1284,20 +1330,22 @@ fn draw_single_annotation(
                 let lines = wrap_text(cr, text, max_text_w)?;
                 let line_h = *font_size * 1.25;
                 let total_h = lines.len() as f64 * line_h;
-                let start_y = ny + ((bh - total_h) / 2.0).max(pad) + *font_size * 0.85;
+                let start_y = ny + ((bh - total_h) * 0.5).max(pad * 0.5) + *font_size * 0.88;
                 let draw_shadow = fill.a < 0.05 || (text_color.r > 0.7 && text_color.g > 0.7);
                 for (idx, line) in lines.iter().enumerate() {
                     let ly = start_y + idx as f64 * line_h;
                     if ly > ny + bh - 4.0 {
                         break;
                     }
+                    let ext = cr.text_extents(line)?;
+                    let tx = (nx + (bw - ext.width()) * 0.5 - ext.x_bearing()).max(nx + pad * 0.5);
                     if draw_shadow {
                         cr.set_source_rgba(0.0, 0.0, 0.0, 0.65);
-                        cr.move_to(nx + pad + 1.2, ly + 1.2);
+                        cr.move_to(tx + 1.2, ly + 1.2);
                         cr.show_text(line)?;
                     }
                     cr.set_source_rgba(text_color.r, text_color.g, text_color.b, text_color.a);
-                    cr.move_to(nx + pad, ly);
+                    cr.move_to(tx, ly);
                     cr.show_text(line)?;
                 }
             }
@@ -1456,6 +1504,61 @@ fn wrap_text(cr: &cairo::Context, text: &str, max_width: f64) -> Result<Vec<Stri
         lines.push(String::new());
     }
     Ok(lines)
+}
+
+/// Expands `img` on any side where `(min_x, min_y, max_x, max_y)` extends beyond the
+/// current image bounds, adding `margin` pixels of breathing room and translating
+/// all annotations by `(left, top)` so coordinates stay aligned.
+pub fn expand_image_to_fit_bounds(
+    img: &RgbaImage,
+    items: &mut [Annotation],
+    min_x: f64,
+    min_y: f64,
+    max_x: f64,
+    max_y: f64,
+    margin: f64,
+) -> Option<RgbaImage> {
+    let w = img.width() as f64;
+    let h = img.height() as f64;
+    let left = if min_x < 0.0 {
+        (-min_x + margin).ceil() as u32
+    } else {
+        0
+    };
+    let top = if min_y < 0.0 {
+        (-min_y + margin).ceil() as u32
+    } else {
+        0
+    };
+    let right = if max_x > w {
+        (max_x - w + margin).ceil() as u32
+    } else {
+        0
+    };
+    let bottom = if max_y > h {
+        (max_y - h + margin).ceil() as u32
+    } else {
+        0
+    };
+
+    if left == 0 && top == 0 && right == 0 && bottom == 0 {
+        return None;
+    }
+
+    let new_w = img.width() + left + right;
+    let new_h = img.height() + top + bottom;
+    let mut expanded = RgbaImage::from_pixel(new_w, new_h, Rgba([0, 0, 0, 0]));
+    image::imageops::replace(&mut expanded, img, left as i64, top as i64);
+
+    if left > 0 || top > 0 {
+        let dx = left as f64;
+        let dy = top as f64;
+        for ann in items {
+            ann.translate(dx, dy);
+        }
+    }
+
+    Some(expanded)
 }
 
 #[cfg(test)]
@@ -1741,5 +1844,73 @@ mod tests {
         assert!(bubble.set_text("Blase Neu".into()));
         assert_eq!(bubble.current_text(), Some("Blase Neu"));
         assert!(!blur.set_text("Nope".into()));
+    }
+
+    #[test]
+    fn expand_image_to_fit_speech_bubble_on_all_sides() {
+        let base = RgbaImage::from_pixel(100, 80, Rgba([10, 20, 30, 255]));
+        let mut inside = vec![Annotation::SpeechBubble {
+            x: 20.0,
+            y: 20.0,
+            w: 50.0,
+            h: 30.0,
+            tail_x: 30.0,
+            tail_y: 65.0,
+            text: "OK".into(),
+            fill: Color::WHITE,
+            border: Color::BLACK,
+            text_color: Color::BLACK,
+            font_size: 14.0,
+        }];
+        let (ix0, iy0, ix1, iy1) = inside[0].speech_bubble_bounds().unwrap();
+        assert!(expand_image_to_fit_bounds(&base, &mut inside, ix0, iy0, ix1, iy1, 16.0).is_none());
+
+        // Extending past left & top shifts annotations into positive coordinates
+        let mut outside_lt = vec![Annotation::SpeechBubble {
+            x: -20.0,
+            y: -10.0,
+            w: 60.0,
+            h: 40.0,
+            tail_x: 10.0,
+            tail_y: 45.0,
+            text: "Links Oben".into(),
+            fill: Color::WHITE,
+            border: Color::BLACK,
+            text_color: Color::BLACK,
+            font_size: 14.0,
+        }];
+        let (min_x, min_y, max_x, max_y) = outside_lt[0].speech_bubble_bounds().unwrap();
+        let expanded_lt =
+            expand_image_to_fit_bounds(&base, &mut outside_lt, min_x, min_y, max_x, max_y, 16.0)
+                .expect("should expand left & top");
+        assert_eq!(expanded_lt.width(), 140);
+        assert_eq!(expanded_lt.height(), 110);
+        // Original top-left pixel moved by (40, 30)
+        assert_eq!(expanded_lt.get_pixel(40, 30).0, [10, 20, 30, 255]);
+        assert_eq!(expanded_lt.get_pixel(0, 0).0, [0, 0, 0, 0]);
+        let (nx0, ny0, _, _) = outside_lt[0].speech_bubble_bounds().unwrap();
+        assert!(nx0 >= 0.0 && ny0 >= 0.0);
+
+        // Extending past right & bottom expands without shifting top-left origin
+        let mut outside_rb = vec![Annotation::SpeechBubble {
+            x: 70.0,
+            y: 50.0,
+            w: 80.0,
+            h: 50.0,
+            tail_x: 90.0,
+            tail_y: 120.0,
+            text: "Rechts Unten".into(),
+            fill: Color::YELLOW,
+            border: Color::BLACK,
+            text_color: Color::BLACK,
+            font_size: 14.0,
+        }];
+        let (min_x, min_y, max_x, max_y) = outside_rb[0].speech_bubble_bounds().unwrap();
+        let expanded_rb =
+            expand_image_to_fit_bounds(&base, &mut outside_rb, min_x, min_y, max_x, max_y, 16.0)
+                .expect("should expand right & bottom");
+        assert!(expanded_rb.width() > 100);
+        assert!(expanded_rb.height() > 80);
+        assert_eq!(expanded_rb.get_pixel(0, 0).0, [10, 20, 30, 255]);
     }
 }

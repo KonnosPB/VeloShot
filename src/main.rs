@@ -39,8 +39,8 @@ NUTZUNG:
     veloshot [OPTIONEN] [BEFEHL]
 
 BEFEHLE:
-    (ohne Befehl)  Bereichsaufnahme (Greenshot-Zeiger & Lupe) direkt starten + Tray aktivieren
-    capture       Bereichsaufnahme (Greenshot-Stil mit Lupe) sofort starten
+    (ohne Befehl)  Bereichsaufnahme (Fadenkreuz & Lupe) direkt starten + Tray aktivieren
+    capture       Bereichsaufnahme (mit Lupe) sofort starten
     history       Verlaufs-Karussell öffnen
     window        Hauptfenster öffnen
     settings      Einstellungen öffnen

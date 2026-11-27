@@ -8,7 +8,7 @@
   <description>
     <p>
       VeloShot ist ein natives GNOME/Wayland-Screenshot-Werkzeug in Rust mit
-      Greenshot-ähnlicher Lupe zur pixelgenauen Bereichsauswahl, einem flüssigen
+      präziser 6×-Live-Lupe zur pixelgenauen Bereichsauswahl, einem flüssigen
       Verlaufs-Karussell (oben, unten, links, rechts oder zentral) sowie integriertem
       Annotations-Editor für Rechtecke, Text, Sprechblasen und Verwischen/Verpixeln.
     </p>
