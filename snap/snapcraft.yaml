@@ -29,26 +29,10 @@ apps:
       - home
 
 parts:
-  rust-deps:
-    plugin: nil
-    build-packages:
-      - curl
-      - build-essential
-    override-build: |
-      set -eu
-      installer="$(mktemp)"
-      trap 'rm -f "$installer"' EXIT
-      curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --retry-delay 2 -o "$installer" https://sh.rustup.rs
-      sh "$installer" -y --default-toolchain stable --profile minimal
-      craftctl default
-
   veloshot:
     plugin: rust
     source: .
-    after: [rust-deps]
     rust-channel: "stable"
-    build-environment:
-      - PATH: "$HOME/.cargo/bin:$PATH"
     build-packages:
       - pkg-config
       - libgtk-4-dev
