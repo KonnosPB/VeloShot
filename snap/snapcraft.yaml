@@ -35,7 +35,11 @@ parts:
       - curl
       - build-essential
     override-build: |
-      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+      set -eu
+      installer="$(mktemp)"
+      trap 'rm -f "$installer"' EXIT
+      curl --proto '=https' --tlsv1.2 -fsSL --retry 3 --retry-delay 2 -o "$installer" https://sh.rustup.rs
+      sh "$installer" -y --default-toolchain stable --profile minimal
       craftctl default
 
   veloshot:
