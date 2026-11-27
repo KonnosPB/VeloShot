@@ -88,7 +88,10 @@ fn main() -> ExitCode {
         Some("1" | "true" | "TRUE" | "yes")
     );
     let log_enabled = log_env || cli_args.iter().any(|a| a == "--log");
-    let first_cmd = cli_args.iter().find(|a| a.as_str() != "--log").map(|s| s.as_str());
+    let first_cmd = cli_args
+        .iter()
+        .find(|a| a.as_str() != "--log")
+        .map(|s| s.as_str());
 
     // Handle --help and --version headlessly before initializing GTK/display.
     match first_cmd {

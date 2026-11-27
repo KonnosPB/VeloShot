@@ -4,7 +4,7 @@ use std::fs::{self, File};
 use std::io::BufWriter;
 use std::path::Path;
 use std::sync::OnceLock;
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 
 use anyhow::{Context, Result, anyhow};
 use ashpd::desktop::screenshot::Screenshot;
@@ -25,15 +25,54 @@ pub(crate) fn tokio_runtime() -> &'static Runtime {
     })
 }
 
-async fn load_portal_response(response: ashpd::desktop::screenshot::Screenshot) -> Result<RgbaImage> {
-    let path = response
-        .uri()
-        .to_file_path()
-        .map_err(|_| anyhow!("Ungültige Datei-URI vom Screenshot-Portal: {}", response.uri()))?;
+fn should_cleanup_portal_file(
+    path: &Path,
+    picture_dir: Option<&Path>,
+    temp_dir: &Path,
+    started_at: SystemTime,
+) -> bool {
+    if path.starts_with(temp_dir) {
+        return true;
+    }
+    let Some(pic_dir) = picture_dir else {
+        return false;
+    };
+    if path.parent() != Some(pic_dir) {
+        return false;
+    }
+    let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+        return false;
+    };
+    if !name.starts_with("Screenshot from ") || !name.ends_with(".png") {
+        return false;
+    }
+    let threshold = started_at
+        .checked_sub(Duration::from_secs(2))
+        .unwrap_or(started_at);
+    fs::metadata(path)
+        .and_then(|meta| meta.modified())
+        .is_ok_and(|mtime| mtime >= threshold)
+}
+
+async fn load_portal_response(
+    response: ashpd::desktop::screenshot::Screenshot,
+    started_at: SystemTime,
+) -> Result<RgbaImage> {
+    let path = response.uri().to_file_path().map_err(|_| {
+        anyhow!(
+            "Ungültige Datei-URI vom Screenshot-Portal: {}",
+            response.uri()
+        )
+    })?;
 
     let dyn_img = image::open(&path)
         .with_context(|| format!("Konnte Portal-Screenshot nicht öffnen: {}", path.display()))?;
-    if path.to_string_lossy().contains("Screenshot") || path.starts_with(std::env::temp_dir()) {
+    if should_cleanup_portal_file(
+        &path,
+        dirs::picture_dir().as_deref(),
+        &std::env::temp_dir(),
+        started_at,
+    ) {
         let _ = fs::remove_file(&path);
     }
     Ok(dyn_img.to_rgba8())
@@ -44,6 +83,7 @@ async fn load_portal_response(response: ashpd::desktop::screenshot::Screenshot) 
 /// First attempts non-interactive silent capture; if the portal rejects it
 /// (e.g., initial permission needed), falls back to interactive portal mode.
 pub async fn capture_fullscreen_async() -> Result<RgbaImage> {
+    let started_at = SystemTime::now();
     let response = match Screenshot::request()
         .interactive(false)
         .modal(true)
@@ -53,7 +93,10 @@ pub async fn capture_fullscreen_async() -> Result<RgbaImage> {
         Ok(req) => match req.response() {
             Ok(resp) => resp,
             Err(err) => {
-                if matches!(err, ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled)) {
+                if matches!(
+                    err,
+                    ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled)
+                ) {
                     return Err(anyhow!("Aufnahme abgebrochen"));
                 }
                 Screenshot::request()
@@ -76,11 +119,12 @@ pub async fn capture_fullscreen_async() -> Result<RgbaImage> {
             .context("Keine Screenshot-Antwort vom Portal erhalten")?,
     };
 
-    load_portal_response(response).await
+    load_portal_response(response, started_at).await
 }
 
 /// Captures a window or screen using the interactive GNOME portal dialog.
 pub async fn capture_interactive_async() -> Result<RgbaImage> {
+    let started_at = SystemTime::now();
     let response = Screenshot::request()
         .interactive(true)
         .modal(true)
@@ -89,14 +133,17 @@ pub async fn capture_interactive_async() -> Result<RgbaImage> {
         .context("Interaktiver Portal-Screenshot fehlgeschlagen")?
         .response()
         .map_err(|err| {
-            if matches!(err, ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled)) {
+            if matches!(
+                err,
+                ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled)
+            ) {
                 anyhow!("Aufnahme abgebrochen")
             } else {
                 anyhow!("Keine Screenshot-Antwort vom Portal erhalten: {err}")
             }
         })?;
 
-    load_portal_response(response).await
+    load_portal_response(response, started_at).await
 }
 
 /// Spawns fullscreen capture on the background Tokio runtime and delivers the result on a channel.
@@ -154,11 +201,7 @@ pub fn crop_region(img: &RgbaImage, x: u32, y: u32, w: u32, h: u32) -> Result<Rg
 ///
 /// Alpha pixels are composited onto opaque white when encoding as JPEG so semi-transparent
 /// regions and rounded Beautify frames render cleanly without encoding errors.
-pub fn export_rgba_image(
-    img: &RgbaImage,
-    dest: &Path,
-    default_format: ExportFormat,
-) -> Result<()> {
+pub fn export_rgba_image(img: &RgbaImage, dest: &Path, default_format: ExportFormat) -> Result<()> {
     let ext = dest
         .extension()
         .and_then(|e| e.to_str())
@@ -183,8 +226,12 @@ pub fn export_rgba_image(
                 dst[1] = ((src[1] as u32 * a + 255 * inv_a + 127) / 255) as u8;
                 dst[2] = ((src[2] as u32 * a + 255 * inv_a + 127) / 255) as u8;
             }
-            let file = File::create(dest)
-                .with_context(|| format!("JPEG-Datei konnte nicht erstellt werden: {}", dest.display()))?;
+            let file = File::create(dest).with_context(|| {
+                format!(
+                    "JPEG-Datei konnte nicht erstellt werden: {}",
+                    dest.display()
+                )
+            })?;
             let mut writer = BufWriter::new(file);
             let encoder = JpegEncoder::new_with_quality(&mut writer, 92);
             rgb.write_with_encoder(encoder)
@@ -249,5 +296,62 @@ mod tests {
         );
 
         let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn portal_cleanup_only_deletes_fresh_portal_files() {
+        let root = std::env::temp_dir().join(format!("veloshot-portal-{}", uuid::Uuid::new_v4()));
+        let fake_temp = root.join("tmp");
+        let fake_pics = root.join("Pictures");
+        let nested_shots = fake_pics.join("Screenshots");
+        fs::create_dir_all(&fake_temp).unwrap();
+        fs::create_dir_all(&nested_shots).unwrap();
+
+        let temp_file = fake_temp.join("portal.png");
+        let fresh_portal = fake_pics.join("Screenshot from 2026-11-27 22-55-00.png");
+        let nested_file = nested_shots.join("user-note.png");
+        let user_file = fake_pics.join("Vacation Screenshot.png");
+
+        for f in [&temp_file, &fresh_portal, &nested_file, &user_file] {
+            fs::write(f, b"png").unwrap();
+        }
+
+        let now = SystemTime::now();
+        assert!(should_cleanup_portal_file(
+            &temp_file,
+            Some(&fake_pics),
+            &fake_temp,
+            now
+        ));
+        assert!(should_cleanup_portal_file(
+            &fresh_portal,
+            Some(&fake_pics),
+            &fake_temp,
+            now
+        ));
+        // Pre-existing portal screenshot older than capture start must NOT be removed
+        let later_capture = now + Duration::from_secs(60);
+        assert!(!should_cleanup_portal_file(
+            &fresh_portal,
+            Some(&fake_pics),
+            &fake_temp,
+            later_capture
+        ));
+        // Arbitrary file inside a folder named "Screenshots" must NOT be removed
+        assert!(!should_cleanup_portal_file(
+            &nested_file,
+            Some(&fake_pics),
+            &fake_temp,
+            now
+        ));
+        // Arbitrary user file containing "Screenshot" in Pictures must NOT be removed
+        assert!(!should_cleanup_portal_file(
+            &user_file,
+            Some(&fake_pics),
+            &fake_temp,
+            now
+        ));
+
+        let _ = fs::remove_dir_all(&root);
     }
 }

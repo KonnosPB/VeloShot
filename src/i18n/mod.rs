@@ -138,10 +138,7 @@ fn detect_system_language() -> ResolvedLang {
 
 fn detect_locale_code(locale: &str) -> ResolvedLang {
     let lower = locale.trim().to_ascii_lowercase();
-    let code = lower
-        .split(['.', '@', '_', '-'])
-        .next()
-        .unwrap_or_default();
+    let code = lower.split(['.', '@', '_', '-']).next().unwrap_or_default();
     match code {
         "de" => ResolvedLang::De,
         "el" => ResolvedLang::El,
@@ -427,13 +424,24 @@ mod tests {
             ResolvedLang::Ro,
             ResolvedLang::Uk,
         ];
-        let placeholders = ["{VERSION}", "{count}", "{max}", "{pos}", "{cap}", "{secs}", "{chars}"];
+        let placeholders = [
+            "{VERSION}",
+            "{count}",
+            "{max}",
+            "{pos}",
+            "{cap}",
+            "{secs}",
+            "{chars}",
+        ];
 
         for lang in non_en_de {
             for &key in ALL_TRANSLATION_KEYS {
                 let translated = translate_en(lang, key)
                     .unwrap_or_else(|| panic!("Missing translation for {lang:?}: {key:?}"));
-                assert!(!translated.is_empty(), "Empty translation for {lang:?}: {key:?}");
+                assert!(
+                    !translated.is_empty(),
+                    "Empty translation for {lang:?}: {key:?}"
+                );
 
                 if key.contains("&amp;") {
                     assert!(

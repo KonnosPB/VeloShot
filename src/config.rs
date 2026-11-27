@@ -98,12 +98,17 @@ pub enum CarouselPosition {
     Top,
     #[default]
     Bottom,
+    /// Retained strictly for backward-compatible deserialization of legacy configs;
+    /// normalized to [`CarouselPosition::Bottom`] by [`AppConfig::sanitize`].
     Left,
+    /// Retained strictly for backward-compatible deserialization of legacy configs;
+    /// normalized to [`CarouselPosition::Bottom`] by [`AppConfig::sanitize`].
     Right,
     Center,
 }
 
 impl CarouselPosition {
+    /// Positions offered in the Preferences dropdown; legacy `Left`/`Right` are normalized to `Bottom`.
     pub const ALL: [CarouselPosition; 3] = [
         CarouselPosition::Top,
         CarouselPosition::Bottom,
@@ -129,10 +134,7 @@ impl CarouselPosition {
     }
 
     pub fn to_index(self) -> u32 {
-        Self::ALL
-            .iter()
-            .position(|&p| p == self)
-            .unwrap_or(1) as u32
+        Self::ALL.iter().position(|&p| p == self).unwrap_or(1) as u32
     }
 }
 
@@ -166,10 +168,7 @@ impl AfterCaptureAction {
     }
 
     pub fn to_index(self) -> u32 {
-        Self::ALL
-            .iter()
-            .position(|&a| a == self)
-            .unwrap_or(0) as u32
+        Self::ALL.iter().position(|&a| a == self).unwrap_or(0) as u32
     }
 }
 
@@ -433,10 +432,8 @@ mod tests {
 
     #[test]
     fn roundtrip_and_sanitize_config() {
-        let tmp = std::env::temp_dir().join(format!(
-            "jas-config-test-{}.toml",
-            uuid::Uuid::new_v4()
-        ));
+        let tmp =
+            std::env::temp_dir().join(format!("jas-config-test-{}.toml", uuid::Uuid::new_v4()));
 
         let mut cfg = AppConfig {
             language: Language::En,
@@ -524,7 +521,11 @@ mod tests {
             export_format: ExportFormat::Jpg,
             ..AppConfig::default()
         };
-        assert!(explicit_cfg.format_export_filename(ts, 100, 100).ends_with(".png"));
+        assert!(
+            explicit_cfg
+                .format_export_filename(ts, 100, 100)
+                .ends_with(".png")
+        );
 
         let empty_cfg = AppConfig {
             filename_pattern: "   ".to_string(),
@@ -537,10 +538,8 @@ mod tests {
 
     #[test]
     fn legacy_config_toml_loads_with_new_defaults() {
-        let tmp = std::env::temp_dir().join(format!(
-            "veloshot-legacy-cfg-{}.toml",
-            uuid::Uuid::new_v4()
-        ));
+        let tmp =
+            std::env::temp_dir().join(format!("veloshot-legacy-cfg-{}.toml", uuid::Uuid::new_v4()));
         let raw = r#"
 language = "de"
 max_history = 15

@@ -49,13 +49,19 @@ impl HistoryStore {
         let cache_dir = dirs::cache_dir()
             .unwrap_or_else(|| PathBuf::from("."))
             .join(APP_DIR_NAME);
-        Self { data_dir, cache_dir }
+        Self {
+            data_dir,
+            cache_dir,
+        }
     }
 
     /// Creates a store backed by custom directories (useful for tests).
     #[cfg(test)]
     pub fn new_with_dirs(data_dir: PathBuf, cache_dir: PathBuf) -> Self {
-        Self { data_dir, cache_dir }
+        Self {
+            data_dir,
+            cache_dir,
+        }
     }
 
     fn images_dir(&self) -> PathBuf {
@@ -117,10 +123,7 @@ impl HistoryStore {
         thumb
             .save_with_format(&thumb_path, ImageFormat::Png)
             .with_context(|| {
-                format!(
-                    "Konnte Thumbnail nicht speichern: {}",
-                    thumb_path.display()
-                )
+                format!("Konnte Thumbnail nicht speichern: {}", thumb_path.display())
             })?;
         Ok(())
     }
@@ -242,11 +245,17 @@ mod tests {
     fn add_update_prune_and_delete_history() {
         let (store, root) = temp_store();
 
-        let i1 = store.add_image(&solid_img(640, 480, [255, 0, 0, 255]), 2).unwrap();
+        let i1 = store
+            .add_image(&solid_img(640, 480, [255, 0, 0, 255]), 2)
+            .unwrap();
         std::thread::sleep(std::time::Duration::from_millis(5));
-        let i2 = store.add_image(&solid_img(800, 600, [0, 255, 0, 255]), 2).unwrap();
+        let i2 = store
+            .add_image(&solid_img(800, 600, [0, 255, 0, 255]), 2)
+            .unwrap();
         std::thread::sleep(std::time::Duration::from_millis(5));
-        let i3 = store.add_image(&solid_img(100, 50, [0, 0, 255, 255]), 2).unwrap();
+        let i3 = store
+            .add_image(&solid_img(100, 50, [0, 0, 255, 255]), 2)
+            .unwrap();
 
         let listed = store.list();
         assert_eq!(listed.len(), 2);
@@ -279,11 +288,13 @@ mod tests {
     fn corrupt_index_recovers_gracefully() {
         let (store, root) = temp_store();
         fs::create_dir_all(&store.data_dir).unwrap();
-        fs::write(store.data_dir.join("index.json"), "{ invalid json").unwrap();
+        fs::write(store.index_path(), "{ invalid json").unwrap();
 
         assert!(store.list().is_empty());
 
-        let added = store.add_image(&solid_img(64, 48, [12, 34, 56, 255]), 5).unwrap();
+        let added = store
+            .add_image(&solid_img(64, 48, [12, 34, 56, 255]), 5)
+            .unwrap();
         let listed = store.list();
         assert_eq!(listed.len(), 1);
         assert_eq!(listed[0].id, added.id);

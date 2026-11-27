@@ -13,16 +13,13 @@ use crate::config::{
     AfterCaptureAction, AppConfig, CarouselPosition, Language, default_filename_pattern,
 };
 use crate::i18n::tr;
-use crate::{ocr, shortcuts};
 use crate::ui::{AppState, plain_toast};
+use crate::{ocr, shortcuts};
 
 /// Opens the native Libadwaita preferences dialog attached to `parent`.
 pub fn open_preferences(state: AppState, parent: Option<&gtk4::Window>) {
     let dialog = adw::PreferencesDialog::builder()
-        .title(tr(
-            "Einstellungen — VeloShot",
-            "Preferences — VeloShot",
-        ))
+        .title(tr("Einstellungen — VeloShot", "Preferences — VeloShot"))
         .build();
     let dialog_rc = Rc::new(dialog);
     let active_page: Rc<RefCell<Option<adw::PreferencesPage>>> = Rc::new(RefCell::new(None));
@@ -104,7 +101,8 @@ fn build_preferences_page(
             if let Some(old) = page_slot.borrow_mut().take() {
                 dlg_cb.remove(&old);
             }
-            let new_page = build_preferences_page(state_cb, Rc::clone(&dlg_cb), Rc::clone(&page_slot));
+            let new_page =
+                build_preferences_page(state_cb, Rc::clone(&dlg_cb), Rc::clone(&page_slot));
             *page_slot.borrow_mut() = Some(new_page.clone());
             dlg_cb.add(&new_page);
             dlg_cb.add_toast(plain_toast(tr(
@@ -296,28 +294,23 @@ fn build_preferences_page(
             let state_cb = state_dir.clone();
             let row_cb = row_ref.clone();
             let dlg_cb = Rc::clone(&dlg_ref);
-            fd.select_folder(
-                parent_win.as_ref(),
-                gio::Cancellable::NONE,
-                move |res| {
-                    if let Ok(file) = res
-                        && let Some(path) = file.path()
+            fd.select_folder(parent_win.as_ref(), gio::Cancellable::NONE, move |res| {
+                if let Ok(file) = res
+                    && let Some(path) = file.path()
+                {
                     {
-                        {
-                            let mut cfg = state_cb.config.borrow_mut();
-                            cfg.save_dir = Some(path.clone());
-                            let _ = cfg.save();
-                        }
-                        row_cb.set_subtitle(&gtk4::glib::markup_escape_text(
-                            &path.display().to_string(),
-                        ));
-                        dlg_cb.add_toast(plain_toast(tr(
-                            "Standard-Speicherordner aktualisiert",
-                            "Default save folder updated",
-                        )));
+                        let mut cfg = state_cb.config.borrow_mut();
+                        cfg.save_dir = Some(path.clone());
+                        let _ = cfg.save();
                     }
-                },
-            );
+                    row_cb
+                        .set_subtitle(&gtk4::glib::markup_escape_text(&path.display().to_string()));
+                    dlg_cb.add_toast(plain_toast(tr(
+                        "Standard-Speicherordner aktualisiert",
+                        "Default save folder updated",
+                    )));
+                }
+            });
         });
     }
     {
@@ -371,12 +364,18 @@ fn build_preferences_page(
     }
 
     let pattern_preview_row = adw::ActionRow::builder()
-        .title(tr("Vorschau &amp; Platzhalter", "Preview &amp; Placeholders"))
+        .title(tr(
+            "Vorschau &amp; Platzhalter",
+            "Preview &amp; Placeholders",
+        ))
         .subtitle(format_pattern_hint(&state.config.borrow()))
         .build();
     let reset_pattern_btn = gtk4::Button::builder()
         .icon_name("edit-undo-symbolic")
-        .tooltip_text(tr("Standard-Muster wiederherstellen", "Reset default pattern"))
+        .tooltip_text(tr(
+            "Standard-Muster wiederherstellen",
+            "Reset default pattern",
+        ))
         .valign(gtk4::Align::Center)
         .build();
     pattern_preview_row.add_suffix(&reset_pattern_btn);
@@ -481,10 +480,7 @@ fn build_preferences_page(
             let want_active = row.is_active();
             let res = if want_active {
                 let cfg = state_redir.config.borrow().clone();
-                shortcuts::redirect_print_shortcut(
-                    &cfg.capture_shortcut,
-                    &cfg.history_shortcut,
-                )
+                shortcuts::redirect_print_shortcut(&cfg.capture_shortcut, &cfg.history_shortcut)
             } else {
                 shortcuts::restore_default_print_shortcut()
             };
@@ -507,7 +503,10 @@ fn build_preferences_page(
         .build();
 
     let apply_row = adw::ActionRow::builder()
-        .title(tr("Nur eigene Kürzel übernehmen", "Apply custom shortcuts only"))
+        .title(tr(
+            "Nur eigene Kürzel übernehmen",
+            "Apply custom shortcuts only",
+        ))
         .subtitle(if shortcuts::is_running_in_snap() {
             tr(
                 "Im Snap-Modus über GNOME Einstellungen → Tastatur verknüpfen",
@@ -624,7 +623,8 @@ fn build_preferences_page(
                             ));
                             btn_done.set_sensitive(true);
                         }
-                        dlg_done.add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))));
+                        dlg_done
+                            .add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))));
                     }
                     Err(_) => {
                         btn_done.set_sensitive(true);

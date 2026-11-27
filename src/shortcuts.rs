@@ -51,8 +51,7 @@ impl DesktopEnv {
 pub fn detect_desktop_env() -> DesktopEnv {
     let xdg = env::var("XDG_CURRENT_DESKTOP").ok();
     let sess = env::var("DESKTOP_SESSION").ok();
-    let has_swaysock = env::var_os("SWAYSOCK")
-        .is_some_and(|v| !v.is_empty());
+    let has_swaysock = env::var_os("SWAYSOCK").is_some_and(|v| !v.is_empty());
     detect_desktop_from_vars(xdg.as_deref(), sess.as_deref(), has_swaysock)
 }
 
@@ -78,14 +77,21 @@ pub fn detect_desktop_from_vars(
 
     if tokens.iter().any(|t| t.contains("sway")) {
         DesktopEnv::Sway
-    } else if tokens.iter().any(|t| t.contains("kde") || t.contains("plasma")) {
-        DesktopEnv::Kde
-    } else if tokens.iter().any(|t| t.contains("xfce") || t.contains("xubuntu")) {
-        DesktopEnv::Xfce
     } else if tokens
         .iter()
-        .any(|t| t.contains("gnome") || matches!(t.as_str(), "ubuntu" | "ubuntu-wayland" | "ubuntu-xorg") || t.contains("unity"))
+        .any(|t| t.contains("kde") || t.contains("plasma"))
     {
+        DesktopEnv::Kde
+    } else if tokens
+        .iter()
+        .any(|t| t.contains("xfce") || t.contains("xubuntu"))
+    {
+        DesktopEnv::Xfce
+    } else if tokens.iter().any(|t| {
+        t.contains("gnome")
+            || matches!(t.as_str(), "ubuntu" | "ubuntu-wayland" | "ubuntu-xorg")
+            || t.contains("unity")
+    }) {
         DesktopEnv::Gnome
     } else {
         DesktopEnv::Other
@@ -307,10 +313,7 @@ fn snap_redirect_notice(env: DesktopEnv) -> String {
         )
         .to_string()
     } else {
-        format!(
-            "{}: Print → veloshot capture",
-            env.display_name()
-        )
+        format!("{}: Print → veloshot capture", env.display_name())
     }
 }
 
@@ -372,7 +375,12 @@ pub fn redirect_gnome_print_shortcut(
         return Ok(snap_redirect_notice(DesktopEnv::Gnome));
     }
 
-    run_gsettings(&["set", GNOME_SHELL_KEYBINDINGS, "show-screenshot-ui", "@as []"])?;
+    run_gsettings(&[
+        "set",
+        GNOME_SHELL_KEYBINDINGS,
+        "show-screenshot-ui",
+        "@as []",
+    ])?;
     apply_gnome_shortcuts(capture_binding, history_binding)?;
 
     Ok(format!(
@@ -486,7 +494,10 @@ fn apply_xfce_shortcuts(capture_binding: &str, history_binding: &str) -> Result<
     ])?;
 
     Ok(saved_summary(
-        tr("Desktop-Tastenkürzel gespeichert", "Desktop shortcuts saved"),
+        tr(
+            "Desktop-Tastenkürzel gespeichert",
+            "Desktop shortcuts saved",
+        ),
         capture_binding,
         history_binding,
     ))
@@ -640,7 +651,10 @@ fn apply_kde_shortcuts(capture_binding: &str, history_binding: &str) -> Result<S
     reload_kde_global_accel();
 
     Ok(saved_summary(
-        tr("Desktop-Tastenkürzel gespeichert", "Desktop shortcuts saved"),
+        tr(
+            "Desktop-Tastenkürzel gespeichert",
+            "Desktop shortcuts saved",
+        ),
         &kde_cap,
         &kde_hist,
     ))
@@ -701,7 +715,10 @@ fn apply_sway_shortcuts(capture_binding: &str, history_binding: &str) -> Result<
 
     Ok(format!(
         "{} ({})",
-        tr("Desktop-Tastenkürzel gespeichert", "Desktop shortcuts saved"),
+        tr(
+            "Desktop-Tastenkürzel gespeichert",
+            "Desktop shortcuts saved"
+        ),
         conf_path.display()
     ))
 }
@@ -836,7 +853,10 @@ mod tests {
             detect_desktop_from_vars(Some("LXQt"), Some("Lubuntu"), false),
             DesktopEnv::Other
         );
-        assert_eq!(detect_desktop_from_vars(None, None, false), DesktopEnv::Other);
+        assert_eq!(
+            detect_desktop_from_vars(None, None, false),
+            DesktopEnv::Other
+        );
     }
 
     #[test]

@@ -135,10 +135,8 @@ mod imp {
                 append_dim_around_rect(snapshot, w, h, hx, hy, hx + hw, hy + hh, &dim_color);
 
                 let accent = gdk::RGBA::new(0.24, 0.62, 0.98, 0.98 * hl_alpha);
-                let mon_rect = gsk::RoundedRect::from_rect(
-                    graphene::Rect::new(hx, hy, hw, hh),
-                    0.0,
-                );
+                let mon_rect =
+                    gsk::RoundedRect::from_rect(graphene::Rect::new(hx, hy, hw, hh), 0.0);
                 snapshot.append_border(&mon_rect, &[4.0; 4], &[accent; 4]);
                 return;
             } else {
@@ -212,8 +210,14 @@ mod imp {
             let grid_color = gdk::RGBA::new(1.0, 1.0, 1.0, 0.14);
             let mut g = zoom;
             while g < loupe_size {
-                snapshot.append_color(&grid_color, &graphene::Rect::new(lx + g, ly, 1.0, loupe_size));
-                snapshot.append_color(&grid_color, &graphene::Rect::new(lx, ly + g, loupe_size, 1.0));
+                snapshot.append_color(
+                    &grid_color,
+                    &graphene::Rect::new(lx + g, ly, 1.0, loupe_size),
+                );
+                snapshot.append_color(
+                    &grid_color,
+                    &graphene::Rect::new(lx, ly + g, loupe_size, 1.0),
+                );
                 g += zoom;
             }
 
@@ -861,23 +865,21 @@ pub fn open_region_overlay(state: AppState, full_img: RgbaImage) {
     let img_key = Rc::clone(&img_rc);
     let state_key = state.clone();
     let done_key = Rc::clone(&completed);
-    key_ctrl.connect_key_pressed(move |_, key, _, _| {
-        match key {
-            gdk::Key::Escape => {
-                win_key.close();
-                glib::Propagation::Stop
-            }
-            gdk::Key::Return | gdk::Key::KP_Enter => {
-                if !done_key.get() {
-                    done_key.set(true);
-                    let full = (*img_key).clone();
-                    win_key.close();
-                    handle_captured_region(state_key.clone(), full);
-                }
-                glib::Propagation::Stop
-            }
-            _ => glib::Propagation::Proceed,
+    key_ctrl.connect_key_pressed(move |_, key, _, _| match key {
+        gdk::Key::Escape => {
+            win_key.close();
+            glib::Propagation::Stop
         }
+        gdk::Key::Return | gdk::Key::KP_Enter => {
+            if !done_key.get() {
+                done_key.set(true);
+                let full = (*img_key).clone();
+                win_key.close();
+                handle_captured_region(state_key.clone(), full);
+            }
+            glib::Propagation::Stop
+        }
+        _ => glib::Propagation::Proceed,
     });
     window.add_controller(key_ctrl);
 

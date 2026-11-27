@@ -347,7 +347,10 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         .child(&icons::icon_image("jas-ellipse", tool_px))
         .css_classes(["tool-icon-btn", tool_size_cls])
         .group(&select_btn)
-        .tooltip_text(tr("Kreis / Ellipse ziehen (3)", "Draw circle / ellipse (3)"))
+        .tooltip_text(tr(
+            "Kreis / Ellipse ziehen (3)",
+            "Draw circle / ellipse (3)",
+        ))
         .build();
     let marker_btn = gtk4::ToggleButton::builder()
         .child(&icons::icon_image("jas-marker", tool_px))
@@ -737,10 +740,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         .build();
     let zoom_reset_btn = gtk4::Button::builder()
         .label("100%")
-        .tooltip_text(tr(
-            "Zoom auf 100% zurücksetzen",
-            "Reset zoom to 100%",
-        ))
+        .tooltip_text(tr("Zoom auf 100% zurücksetzen", "Reset zoom to 100%"))
         .build();
     let zoom_in_btn = gtk4::Button::builder()
         .icon_name("zoom-in-symbolic")
@@ -892,7 +892,8 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
         });
     }
     {
-        let scroll_zoom = gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
+        let scroll_zoom =
+            gtk4::EventControllerScroll::new(gtk4::EventControllerScrollFlags::VERTICAL);
         let ed = Rc::clone(&ed);
         let sync_canvas_size = sync_canvas_size.clone();
         scroll_zoom.connect_scroll(move |ctrl, _dx, dy| {
@@ -1015,11 +1016,7 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                 let mut st = ed.borrow_mut();
                 match target {
                     PendingTextTarget::EditExisting { index } => {
-                        let unchanged = st
-                            .stack
-                            .items
-                            .get(index)
-                            .and_then(|a| a.current_text())
+                        let unchanged = st.stack.items.get(index).and_then(|a| a.current_text())
                             == Some(text.as_str());
                         if !unchanged && index < st.stack.items.len() {
                             st.push_undo_snapshot();
@@ -1482,10 +1479,8 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                         drop(st);
                         sync_history_btns();
                         sync_canvas_size();
-                        toast_overlay.add_toast(plain_toast(tr(
-                            "Bild zugeschnitten",
-                            "Image cropped",
-                        )));
+                        toast_overlay
+                            .add_toast(plain_toast(tr("Bild zugeschnitten", "Image cropped")));
                         return;
                     }
                 }
@@ -1624,10 +1619,9 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                 "Bearbeitetes Bild kopiert",
                 "Edited image copied",
             ))),
-            Err(err) => toast_overlay.add_toast(plain_toast(&format!(
-                "{}: {err}",
-                tr("Fehler", "Error")
-            ))),
+            Err(err) => {
+                toast_overlay.add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))))
+            }
         }
     });
 
@@ -1664,31 +1658,23 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
             let render_current = Rc::clone(&render_current);
             let export_fmt = state.config.borrow().export_format;
             let toast_overlay = toast_overlay.clone();
-            dialog.save(
-                Some(&window),
-                gtk4::gio::Cancellable::NONE,
-                move |res| {
-                    if let Ok(file) = res
-                        && let Some(dest) = file.path()
+            dialog.save(Some(&window), gtk4::gio::Cancellable::NONE, move |res| {
+                if let Ok(file) = res
+                    && let Some(dest) = file.path()
+                {
+                    match render_current()
+                        .and_then(|img| crate::capture::export_rgba_image(&img, &dest, export_fmt))
                     {
-                        match render_current()
-                            .and_then(|img| crate::capture::export_rgba_image(&img, &dest, export_fmt))
-                        {
-                            Ok(()) => toast_overlay.add_toast(plain_toast(&format!(
-                                "{}: {}",
-                                tr("Exportiert", "Exported"),
-                                dest.file_name()
-                                    .and_then(|n| n.to_str())
-                                    .unwrap_or("Bild")
-                            ))),
-                            Err(err) => toast_overlay.add_toast(plain_toast(&format!(
-                                "{}: {err}",
-                                tr("Fehler", "Error")
-                            ))),
-                        }
+                        Ok(()) => toast_overlay.add_toast(plain_toast(&format!(
+                            "{}: {}",
+                            tr("Exportiert", "Exported"),
+                            dest.file_name().and_then(|n| n.to_str()).unwrap_or("Bild")
+                        ))),
+                        Err(err) => toast_overlay
+                            .add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error")))),
                     }
-                },
-            );
+                }
+            });
         }
     });
 
@@ -1715,17 +1701,14 @@ pub fn open_editor(state: AppState, image: RgbaImage, history_item: Option<Histo
                         )));
                     }
                     Err(err) => {
-                        toast_overlay.add_toast(plain_toast(&format!(
-                            "{}: {err}",
-                            tr("Fehler", "Error")
-                        )));
+                        toast_overlay
+                            .add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))));
                     }
                 }
             }
-            Err(err) => toast_overlay.add_toast(plain_toast(&format!(
-                "{}: {err}",
-                tr("Fehler", "Error")
-            ))),
+            Err(err) => {
+                toast_overlay.add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))))
+            }
         }
     });
 

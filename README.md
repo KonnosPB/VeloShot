@@ -1,5 +1,8 @@
 # VeloShot
 
+[![CI](https://github.com/KonnosPB/VeloShot/actions/workflows/ci.yml/badge.svg?branch=develop)](https://github.com/KonnosPB/VeloShot/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 ![VeloShot Banner](data/branding/store-banner.png)
 
 [Deutsch](#deutsch) · [English](#english)

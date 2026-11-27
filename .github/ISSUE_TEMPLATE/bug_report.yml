@@ -1,0 +1,80 @@
+name: Bug Report
+description: Report a crash, visual glitch, shortcut issue, or unexpected behavior in VeloShot
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      placeholder: |
+        1. Press Print (or run `veloshot`)
+        2. Select a region and release
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_actual
+    attributes:
+      label: Expected vs. Actual Behavior
+      description: What did you expect to happen, and what happened instead?
+    validations:
+      required: true
+
+  - type: input
+    id: os_version
+    attributes:
+      label: Ubuntu / Linux Distribution & Version
+      placeholder: "e.g. Ubuntu 26.04.1 LTS / Ubuntu 24.04 LTS"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: desktop
+    attributes:
+      label: Desktop Environment
+      options:
+        - GNOME (Ubuntu)
+        - KDE Plasma
+        - XFCE
+        - Sway
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: session_type
+    attributes:
+      label: Session Type (`echo $XDG_SESSION_TYPE`)
+      options:
+        - wayland
+        - x11
+        - Unknown
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: VeloShot Version (`veloshot --version`)
+      placeholder: "e.g. veloshot 0.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs (`~/.local/state/veloshot/app.log`)
+      description: If reproducible with `veloshot --log`, paste relevant log lines here.
+      render: text
+    validations:
+      required: false

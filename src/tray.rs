@@ -236,11 +236,23 @@ fn render_branded_tray_icon(size: i32) -> Icon {
         let _ = cr.stroke();
 
         // Warm Ubuntu-orange aperture glint + crisp specular highlight
-        cr.arc(cx + lens_r * 0.34, cy + lens_r * 0.32, (s * 0.045).max(1.1), 0.0, std::f64::consts::TAU);
+        cr.arc(
+            cx + lens_r * 0.34,
+            cy + lens_r * 0.32,
+            (s * 0.045).max(1.1),
+            0.0,
+            std::f64::consts::TAU,
+        );
         cr.set_source_rgba(1.0, 0.471, 0.0, 0.95); // #ff7800
         let _ = cr.fill();
 
-        cr.arc(cx - lens_r * 0.28, cy - lens_r * 0.30, (s * 0.036).max(0.9), 0.0, std::f64::consts::TAU);
+        cr.arc(
+            cx - lens_r * 0.28,
+            cy - lens_r * 0.30,
+            (s * 0.036).max(0.9),
+            0.0,
+            std::f64::consts::TAU,
+        );
         cr.set_source_rgba(1.0, 1.0, 1.0, 0.88);
         let _ = cr.fill();
     }
@@ -470,7 +482,8 @@ mod tests {
             let mid = ((expected as usize / 2) * expected as usize + expected as usize / 2) * 4;
             assert_eq!(icon.data[mid], 255);
             // Upper squircle region is opaque vibrant blue-violet
-            let badge = (expected as usize / 6) * expected as usize * 4 + (expected as usize / 2) * 4;
+            let badge =
+                (expected as usize / 6) * expected as usize * 4 + (expected as usize / 2) * 4;
             assert_eq!(icon.data[badge], 255);
             assert!(icon.data[badge + 3] > 150);
         }

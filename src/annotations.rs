@@ -335,9 +335,7 @@ impl Annotation {
             | Annotation::SpeechBubble { x, y, w, h, .. }
             | Annotation::Blur { x, y, w, h, .. }
             | Annotation::Spotlight { x, y, w, h } => normalize_rect(*x, *y, *w, *h),
-            Annotation::Arrow {
-                x1, y1, x2, y2, ..
-            } => {
+            Annotation::Arrow { x1, y1, x2, y2, .. } => {
                 let x = x1.min(*x2);
                 let y = y1.min(*y2);
                 (x, y, (x2 - x1).abs().max(12.0), (y2 - y1).abs().max(12.0))
@@ -358,9 +356,7 @@ impl Annotation {
                 (x, y, w, h)
             }
             Annotation::Freehand {
-                points,
-                line_width,
-                ..
+                points, line_width, ..
             } => {
                 if points.is_empty() {
                     return (0.0, 0.0, 0.0, 0.0);
@@ -471,8 +467,7 @@ impl Annotation {
                 *radius = size.clamp(12.0, 32.0);
                 true
             }
-            Annotation::Text { font_size, .. }
-            | Annotation::SpeechBubble { font_size, .. } => {
+            Annotation::Text { font_size, .. } | Annotation::SpeechBubble { font_size, .. } => {
                 *font_size = size.max(10.0);
                 true
             }
@@ -489,8 +484,9 @@ impl Annotation {
             | Annotation::Freehand { line_width, .. } => Some(*line_width),
             Annotation::Highlighter { width, .. } => Some(*width),
             Annotation::StepBadge { radius, .. } => Some(*radius),
-            Annotation::Text { font_size, .. }
-            | Annotation::SpeechBubble { font_size, .. } => Some(*font_size),
+            Annotation::Text { font_size, .. } | Annotation::SpeechBubble { font_size, .. } => {
+                Some(*font_size)
+            }
             Annotation::Blur { .. } | Annotation::Spotlight { .. } => None,
         }
     }
@@ -765,12 +761,7 @@ pub fn draw_selection_box(cr: &cairo::Context, ann: &Annotation) -> Result<()> {
 
     cr.set_dash(&[], 0.0);
     let handle = 6.0;
-    for (hx, hy) in [
-        (rx, ry),
-        (rx + rw, ry),
-        (rx, ry + rh),
-        (rx + rw, ry + rh),
-    ] {
+    for (hx, hy) in [(rx, ry), (rx + rw, ry), (rx, ry + rh), (rx + rw, ry + rh)] {
         cr.set_source_rgba(1.0, 1.0, 1.0, 1.0);
         cr.rectangle(hx - handle * 0.5, hy - handle * 0.5, handle, handle);
         cr.fill_preserve()?;
@@ -1398,15 +1389,7 @@ pub fn draw_rounded_rect(cr: &cairo::Context, x: f64, y: f64, w: f64, h: f64, ra
     cr.close_path();
 }
 
-fn draw_bubble_path(
-    cr: &cairo::Context,
-    x: f64,
-    y: f64,
-    w: f64,
-    h: f64,
-    tail_x: f64,
-    tail_y: f64,
-) {
+fn draw_bubble_path(cr: &cairo::Context, x: f64, y: f64, w: f64, h: f64, tail_x: f64, tail_y: f64) {
     #[derive(Clone, Copy, PartialEq, Eq)]
     enum TailSide {
         None,

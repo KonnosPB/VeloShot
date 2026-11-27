@@ -13,19 +13,19 @@ pub fn copy_rgba_to_clipboard(img: &RgbaImage) -> Result<()> {
         .context("PNG-Kodierung für Zwischenablage fehlgeschlagen")?;
 
     let bytes = glib::Bytes::from_owned(png_bytes);
-    let texture = gdk::Texture::from_bytes(&bytes)
-        .context("Konnte GdkTexture aus PNG nicht erzeugen")?;
+    let texture =
+        gdk::Texture::from_bytes(&bytes).context("Konnte GdkTexture aus PNG nicht erzeugen")?;
 
-    let display = gdk::Display::default()
-        .ok_or_else(|| anyhow!("Kein grafisches Display verfügbar"))?;
+    let display =
+        gdk::Display::default().ok_or_else(|| anyhow!("Kein grafisches Display verfügbar"))?;
     display.clipboard().set_texture(&texture);
     Ok(())
 }
 
 /// Copies plain UTF-8 text (e.g. OCR output) onto the default Wayland/GDK clipboard.
 pub fn copy_text_to_clipboard(text: &str) -> Result<()> {
-    let display = gdk::Display::default()
-        .ok_or_else(|| anyhow!("Kein grafisches Display verfügbar"))?;
+    let display =
+        gdk::Display::default().ok_or_else(|| anyhow!("Kein grafisches Display verfügbar"))?;
     display.clipboard().set_text(text);
     Ok(())
 }

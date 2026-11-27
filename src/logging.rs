@@ -28,11 +28,7 @@ pub fn set_enabled(enabled: bool) {
     if enabled && !was {
         let path = log_file_path();
         eprintln!("Protokollierung aktiv: {}", path.display());
-        write_line(&format_log_line(
-            "App",
-            "INFO",
-            "Protokollierung gestartet",
-        ));
+        write_line(&format_log_line("App", "INFO", "Protokollierung gestartet"));
     }
 }
 
@@ -47,11 +43,7 @@ pub fn init(enabled: bool) {
             msg.contains("VK_SUBOPTIMAL_KHR") || msg.contains("VK_ERROR_OUT_OF_DATE_KHR");
 
         if LOG_ENABLED.load(Ordering::Relaxed) {
-            let line = format_log_line(
-                domain.unwrap_or("GLib"),
-                level_label(level),
-                msg,
-            );
+            let line = format_log_line(domain.unwrap_or("GLib"), level_label(level), msg);
             write_line(&line);
         }
 

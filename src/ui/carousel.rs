@@ -567,7 +567,10 @@ pub fn open_carousel(state: AppState) {
         move |close_after: bool| {
             let item = cstate.borrow().current_item().cloned();
             if let Some(item) = item {
-                match store.load_image(&item).and_then(|img| copy_rgba_to_clipboard(&img)) {
+                match store
+                    .load_image(&item)
+                    .and_then(|img| copy_rgba_to_clipboard(&img))
+                {
                     Ok(()) => {
                         if close_after {
                             window.close();
@@ -579,10 +582,8 @@ pub fn open_carousel(state: AppState) {
                         }
                     }
                     Err(err) => {
-                        toast_overlay.add_toast(plain_toast(&format!(
-                            "{}: {err}",
-                            tr("Fehler", "Error")
-                        )));
+                        toast_overlay
+                            .add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))));
                     }
                 }
             }
@@ -603,10 +604,8 @@ pub fn open_carousel(state: AppState) {
                         editor::open_editor(state.clone(), img, Some(item));
                     }
                     Err(err) => {
-                        toast_overlay.add_toast(plain_toast(&format!(
-                            "{}: {err}",
-                            tr("Fehler", "Error")
-                        )));
+                        toast_overlay
+                            .add_toast(plain_toast(&format!("{}: {err}", tr("Fehler", "Error"))));
                     }
                 }
             }
@@ -636,32 +635,25 @@ pub fn open_carousel(state: AppState) {
                 let store = state.store.clone();
                 let export_fmt = state.config.borrow().export_format;
                 let toast_overlay = toast_overlay.clone();
-                dialog.save(
-                    Some(&window),
-                    gtk4::gio::Cancellable::NONE,
-                    move |res| {
-                        if let Ok(file) = res
-                            && let Some(dest) = file.path()
-                        {
-                            match store
-                                .load_image(&item)
-                                .and_then(|img| crate::capture::export_rgba_image(&img, &dest, export_fmt))
-                            {
-                                Ok(()) => toast_overlay.add_toast(plain_toast(&format!(
-                                    "{}: {}",
-                                    tr("Gespeichert", "Saved"),
-                                    dest.file_name()
-                                        .and_then(|n| n.to_str())
-                                        .unwrap_or("Bild")
-                                ))),
-                                Err(err) => toast_overlay.add_toast(plain_toast(&format!(
-                                    "{}: {err}",
-                                    tr("Fehler", "Error")
-                                ))),
-                            }
+                dialog.save(Some(&window), gtk4::gio::Cancellable::NONE, move |res| {
+                    if let Ok(file) = res
+                        && let Some(dest) = file.path()
+                    {
+                        match store.load_image(&item).and_then(|img| {
+                            crate::capture::export_rgba_image(&img, &dest, export_fmt)
+                        }) {
+                            Ok(()) => toast_overlay.add_toast(plain_toast(&format!(
+                                "{}: {}",
+                                tr("Gespeichert", "Saved"),
+                                dest.file_name().and_then(|n| n.to_str()).unwrap_or("Bild")
+                            ))),
+                            Err(err) => toast_overlay.add_toast(plain_toast(&format!(
+                                "{}: {err}",
+                                tr("Fehler", "Error")
+                            ))),
                         }
-                    },
-                );
+                    }
+                });
             }
         }
     });
@@ -900,7 +892,9 @@ pub fn open_carousel(state: AppState) {
             let st = cstate_click.borrow();
             st.card_rects
                 .iter()
-                .find(|(_, cx, cy, cw, ch)| x >= *cx && x <= *cx + *cw && y >= *cy && y <= *cy + *ch)
+                .find(|(_, cx, cy, cw, ch)| {
+                    x >= *cx && x <= *cx + *cw && y >= *cy && y <= *cy + *ch
+                })
                 .map(|(idx, _, _, _, _)| *idx)
         };
         if let Some(idx) = hit {
