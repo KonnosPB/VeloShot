@@ -1657,7 +1657,7 @@ mod tests {
         assert_eq!(rendered.dimensions(), (160, 120));
         let p = rendered.get_pixel(12, 12).0;
         assert!(p[1] > 50 && p[2] > 50);
-        let border_px = rendered.get_pixel(70, 20).0;
+        let border_px = rendered.get_pixel(90, 35).0;
         assert!(border_px[0] > 180 && border_px[1] < 100);
     }
 
