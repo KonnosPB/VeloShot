@@ -1,0 +1,62 @@
+name: Build and Publish Snap
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      release_channel:
+        description: "Snap Store release channel (select 'none' to build only)"
+        required: true
+        default: "edge"
+        type: choice
+        options:
+          - edge
+          - beta
+          - candidate
+          - stable
+          - none
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Snap
+    runs-on: ubuntu-24.04
+    outputs:
+      snap-file: ${{ steps.build-snap.outputs.snap }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build snap
+        id: build-snap
+        uses: snapcore/action-build@v1
+
+      - name: Upload snap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: veloshot-snap
+          path: ${{ steps.build-snap.outputs.snap }}
+
+  publish:
+    name: Publish Snap to Store
+    needs: build
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.release_channel != 'none')
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download built snap artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: veloshot-snap
+          path: .
+
+      - name: Publish to Snap Store
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ needs.build.outputs.snap-file }}
+          release: ${{ github.event_name == 'workflow_dispatch' && inputs.release_channel || 'candidate' }}

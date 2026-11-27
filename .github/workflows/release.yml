@@ -40,7 +40,7 @@ jobs:
       - name: Package release archive & checksums
         run: |
           TAG="${GITHUB_REF_NAME}"
-          PKG_DIR="veloshot-${TAG}-x86_64-linux-ubuntu24.04"
+          PKG_DIR="veloshot-${TAG}-x86_64-linux-gnu"
           mkdir -p "dist/${PKG_DIR}"
           cp target/release/veloshot "dist/${PKG_DIR}/"
           cp install-local.sh LICENSE README.md "dist/${PKG_DIR}/"
