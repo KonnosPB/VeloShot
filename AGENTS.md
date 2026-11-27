@@ -17,3 +17,10 @@
 
 ## Planning Handoff
 See [docs/SPECIFICATION.md](docs/SPECIFICATION.md) for detailed functional requirements, non-functional targets, and open architecture decisions to resolve during planning.
+
+## Standing Repository Rules (Always Follow)
+1. **Keep Documentation Up to Date:** Whenever adding or changing user-facing features, shortcuts, CLI options, or build prerequisites, automatically update `README.md` (both German and English sections) and `CHANGELOG.md` without waiting to be asked.
+2. **Secrets, Privacy & Git Identity:** Never commit secrets, tokens, private emails, or machine-specific paths (`/home/<user>/...`). Keep the repository git identity set to `KonnosPB <38393288+KonnosPB@users.noreply.github.com>`.
+3. **No Competitor References:** Never mention competing screenshot products in code, UI strings, `README.md`, or store metadata.
+4. **17-Language Localization:** Whenever adding or changing user-facing UI strings, update all 17 supported European languages in `src/i18n/` and ensure `i18n::tests::all_17_languages_complete_valid_markup_and_placeholders` passes.
+5. **Quality Gate & Branch Flow:** Before every commit or PR, run `cargo fmt --all -- --check`, `cargo clippy --all-targets -- -D warnings`, and `cargo test --all-targets`. Work on `develop` (or feature branches) and merge into `main` via Pull Request.
