@@ -29,10 +29,22 @@ apps:
       - home
 
 parts:
+  rust-deps:
+    plugin: nil
+    build-packages:
+      - curl
+      - build-essential
+    override-build: |
+      curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal
+      craftctl default
+
   veloshot:
     plugin: rust
     source: .
+    after: [rust-deps]
     rust-channel: "stable"
+    build-environment:
+      - PATH: "$HOME/.cargo/bin:$PATH"
     build-packages:
       - pkg-config
       - libgtk-4-dev
