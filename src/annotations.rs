@@ -904,13 +904,13 @@ pub fn apply_pixelate_region(img: &mut RgbaImage, x: f64, y: f64, w: f64, h: f64
                 }
             }
 
-            if count > 0 {
-                let avg = Rgba([
-                    (sum_r / count) as u8,
-                    (sum_g / count) as u8,
-                    (sum_b / count) as u8,
-                    (sum_a / count) as u8,
-                ]);
+            if let (Some(r), Some(g), Some(b), Some(a)) = (
+                sum_r.checked_div(count),
+                sum_g.checked_div(count),
+                sum_b.checked_div(count),
+                sum_a.checked_div(count),
+            ) {
+                let avg = Rgba([r as u8, g as u8, b as u8, a as u8]);
                 for py in by..bh {
                     for px in bx..bw {
                         img.put_pixel(px, py, avg);
@@ -930,7 +930,7 @@ pub fn apply_all_blurs(
     preview: Option<&Annotation>,
 ) -> RgbaImage {
     let mut working = base_img.clone();
-    for ann in annotations.iter().chain(preview.into_iter()) {
+    for ann in annotations.iter().chain(preview) {
         if let Annotation::Blur {
             x,
             y,
