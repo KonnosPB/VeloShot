@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.konnospb.VeloShot</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>VeloShot</name>
+  <summary>Schnelles Ubuntu-Wayland-Screenshot-Tool mit Verlaufs-Karussell und Editor</summary>
+  <description>
+    <p>
+      VeloShot ist ein natives GNOME/Wayland-Screenshot-Werkzeug in Rust mit
+      präziser 6×-Live-Lupe zur pixelgenauen Bereichsauswahl, einem flüssigen
+      Verlaufs-Karussell (oben, unten, links, rechts oder zentral) sowie integriertem
+      Annotations-Editor für Rechtecke, Text, Sprechblasen und Verwischen/Verpixeln.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.konnospb.VeloShot.desktop</launchable>
+  <url type="homepage">https://github.com/KonnosPB/VeloShot</url>
+  <provides>
+    <binary>veloshot</binary>
+  </provides>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-11-26">
+      <description>
+        <p>Erste Version mit Portal-Aufnahme, 6x-Lupe, 5-Positionen-Karussell und Annotations-Editor.</p>
+      </description>
+    </release>
+  </releases>
+</component>
