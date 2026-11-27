@@ -102,14 +102,14 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "Log file" => pick(lang, "Ficheiro de registo", "Plik dziennika", "Soubor protokolu", "Naplófájl", "Fișier jurnal", "Файл журналу"),
 
         // --- OCR ---
-        "In Snap mode please install from a terminal: sudo apt install tesseract-ocr tesseract-ocr-deu" => pick(
+        "In Snap mode please install from a terminal:" => pick(
             lang,
-            "No modo Snap, instale a partir do terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "W trybie Snap zainstaluj z terminala: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "V režimu Snap nainstalujte z terminálu: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "Snap módban telepítse terminálból: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "În modul Snap, instalați din terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "У режимі Snap установіть із термінала: sudo apt install tesseract-ocr tesseract-ocr-deu",
+            "No modo Snap, instale a partir do terminal:",
+            "W trybie Snap zainstaluj z terminala:",
+            "V režimu Snap nainstalujte z terminálu:",
+            "Snap módban telepítse terminálból:",
+            "În modul Snap, instalați din terminal:",
+            "У режимі Snap установіть із термінала:",
         ),
         "Could not start system installer (pkexec)" => pick(
             lang,
@@ -446,7 +446,7 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "Guide" => pick(lang, "Guia", "Instrukcja", "Průvodce", "Útmutató", "Ghid", "Посібник"),
         "Show & copy install command" => pick(lang, "Mostrar e copiar comando de instalação", "Pokaż i skopiuj polecenie instalacji", "Zobrazit a zkopírovat instalační příkaz", "Telepítési parancs megjelenítése és másolása", "Afișează și copiază comanda de instalare", "Показати та скопіювати команду встановлення"),
         "Installing (password prompt)…" => pick(lang, "A instalar (pedido de palavra-passe)…", "Instalowanie (monit o hasło)…", "Instalace (výzva k zadání hesla)…", "Telepítés (jelszó kérése)…", "Se instalează (solicitare parolă)…", "Установлення (запит пароля)…"),
-        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with German and English language data. Terminal command:" => pick(
+        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with language data for your active language (plus English). Terminal command:" => pick(
             lang,
             "Para reconhecimento de texto no editor, o VeloShot usa \"tesseract-ocr\" com pacotes de idiomas. Comando de terminal:",
             "Do rozpoznawania tekstu w edytorze VeloShot używa \"tesseract-ocr\" z pakietami językowymi. Polecenie terminala:",

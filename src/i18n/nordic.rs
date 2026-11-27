@@ -90,12 +90,12 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "Log file" => pick(lang, "Loggfil", "Logfil", "Loggfil", "Lokitiedosto"),
 
         // --- OCR ---
-        "In Snap mode please install from a terminal: sudo apt install tesseract-ocr tesseract-ocr-deu" => pick(
+        "In Snap mode please install from a terminal:" => pick(
             lang,
-            "I Snap-läge, installera via terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "I Snap-tilstand skal du installere fra terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "I Snap-modus må du installere fra terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "Asenna Snap-tilassa päätteestä: sudo apt install tesseract-ocr tesseract-ocr-deu",
+            "I Snap-läge, installera via terminal:",
+            "I Snap-tilstand skal du installere fra terminal:",
+            "I Snap-modus må du installere fra terminal:",
+            "Asenna Snap-tilassa päätteestä:",
         ),
         "Could not start system installer (pkexec)" => pick(
             lang,
@@ -388,7 +388,7 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "Guide" => pick(lang, "Guide", "Vejledning", "Veiledning", "Ohje"),
         "Show & copy install command" => pick(lang, "Visa & kopiera installationskommando", "Vis & kopiér installationskommando", "Vis & kopier installasjonskommando", "Näytä & kopioi asennuskomento"),
         "Installing (password prompt)…" => pick(lang, "Installerar (lösenord krävs)…", "Installerer (adgangskode påkrævet)…", "Installerer (passordforespørsel)…", "Asennetaan (salasanakehote)…"),
-        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with German and English language data. Terminal command:" => pick(
+        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with language data for your active language (plus English). Terminal command:" => pick(
             lang,
             "För textigenkänning i redigeraren använder VeloShot \"tesseract-ocr\" med språkdata. Terminalkommando:",
             "Til tekstgenkendelse i redigeringen bruger VeloShot \"tesseract-ocr\" med sprogdata. Terminalkommando:",

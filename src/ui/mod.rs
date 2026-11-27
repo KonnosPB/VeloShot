@@ -85,6 +85,10 @@ pub fn install_css() {
             opacity: 0.0;
             transform: scale(0.92);
         }
+        .carousel-dock.flipping,
+        .carousel-preview-stage.flipping {
+            transition: none;
+        }
         .carousel-dock label {
             color: #f3f4f6;
         }

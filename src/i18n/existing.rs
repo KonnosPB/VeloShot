@@ -96,13 +96,13 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "Log file" => pick(lang, "Αρχείο καταγραφής", "Fichier journal", "Archivo de registro", "Logbestand", "File di log"),
 
         // --- OCR ---
-        "In Snap mode please install from a terminal: sudo apt install tesseract-ocr tesseract-ocr-deu" => pick(
+        "In Snap mode please install from a terminal:" => pick(
             lang,
-            "Σε λειτουργία Snap εγκαταστήστε από τερματικό: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "En mode Snap, installez via le terminal : sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "En modo Snap, instale desde terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "Installeer in Snap-modus via de terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
-            "In modalità Snap installa dal terminale: sudo apt install tesseract-ocr tesseract-ocr-deu",
+            "Σε λειτουργία Snap εγκαταστήστε από τερματικό:",
+            "En mode Snap, installez via le terminal :",
+            "En modo Snap, instale desde terminal:",
+            "Installeer in Snap-modus via de terminal:",
+            "In modalità Snap installa dal terminale:",
         ),
         "Could not start system installer (pkexec)" => pick(
             lang,
@@ -424,7 +424,7 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
         "Guide" => pick(lang, "Οδηγός", "Guide", "Guía", "Handleiding", "Guida"),
         "Show & copy install command" => pick(lang, "Εμφάνιση & αντιγραφή εντολής εγκατάστασης", "Afficher et copier la commande d'installation", "Mostrar y copiar comando de instalación", "Installatieopdracht tonen & kopiëren", "Mostra e copia comando di installazione"),
         "Installing (password prompt)…" => pick(lang, "Εγκατάσταση σε εξέλιξη (προτροπή κωδικού)…", "Installation en cours (mot de passe requis)…", "Instalando (solicitud de contraseña)…", "Installeren (wachtwoordvenster)…", "Installazione in corso (richiesta password)…"),
-        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with German and English language data. Terminal command:" => pick(
+        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with language data for your active language (plus English). Terminal command:" => pick(
             lang,
             "Για αναγνώριση κειμένου στον επεξεργαστή, το VeloShot χρησιμοποιεί το «tesseract-ocr» με γλωσσικά δεδομένα. Εντολή τερματικού:",
             "Pour la reconnaissance de texte, VeloShot utilise « tesseract-ocr » avec ses packs de langues. Commande terminal :",

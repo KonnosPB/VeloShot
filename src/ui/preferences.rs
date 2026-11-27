@@ -637,13 +637,14 @@ fn build_preferences_page(
     {
         let dlg_guide = Rc::clone(&dialog_rc);
         guide_btn.connect_clicked(move |_| {
+            let cmd = ocr::install_command();
             let body = format!(
                 "{}\n\n{}",
                 tr(
-                    "Für die Texterkennung im Editor nutzt VeloShot das Paket „tesseract-ocr“ samt deutscher und englischer Sprachdaten. Terminal-Befehl:",
-                    "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with German and English language data. Terminal command:"
+                    "Für die Texterkennung im Editor nutzt VeloShot das Paket „tesseract-ocr“ samt den Sprachdaten deiner aktiven Sprache (sowie Englisch). Terminal-Befehl:",
+                    "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with language data for your active language (plus English). Terminal command:"
                 ),
-                ocr::INSTALL_COMMAND
+                cmd
             );
             let alert = adw::AlertDialog::builder()
                 .heading(tr("Tesseract OCR einrichten", "Set up Tesseract OCR"))
@@ -658,7 +659,7 @@ fn build_preferences_page(
             let dlg_toast = Rc::clone(&dlg_guide);
             alert.connect_response(None, move |_, resp| {
                 if resp == "copy" {
-                    let msg = match copy_text_to_clipboard(ocr::INSTALL_COMMAND) {
+                    let msg = match copy_text_to_clipboard(&cmd) {
                         Ok(()) => tr(
                             "Installationsbefehl in Zwischenablage kopiert",
                             "Install command copied to clipboard",

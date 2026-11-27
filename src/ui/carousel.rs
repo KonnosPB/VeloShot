@@ -6,6 +6,7 @@ use std::rc::Rc;
 
 use gtk4::{cairo, gdk, glib, graphene, prelude::*};
 use libadwaita as adw;
+use libadwaita::prelude::AnimationExt;
 
 use crate::annotations::{draw_rounded_rect, rgba_to_cairo_surface};
 use crate::clipboard::copy_rgba_to_clipboard;
@@ -130,6 +131,7 @@ pub fn open_carousel(state: AppState) {
         .orientation(gtk4::Orientation::Vertical)
         .hexpand(true)
         .vexpand(true)
+        .css_classes(["carousel-preview-stage"])
         .build();
     let preview_card = gtk4::Box::builder()
         .orientation(gtk4::Orientation::Vertical)
@@ -271,13 +273,17 @@ pub fn open_carousel(state: AppState) {
         .css_classes(["tool-icon-btn"])
         .build();
     let flip_btn = if !position.is_vertical() {
+        let tooltip = format!(
+            "{} (F / Tab)",
+            tr(
+                "Leiste nach oben / unten verschieben",
+                "Move dock to top / bottom",
+            )
+        );
         Some(
             gtk4::Button::builder()
                 .child(&icons::icon_image("jas-flip-vertical", 24))
-                .tooltip_text(tr(
-                    "Leiste nach oben / unten verschieben",
-                    "Move dock to top / bottom",
-                ))
+                .tooltip_text(&tooltip)
                 .css_classes(["tool-icon-btn"])
                 .build(),
         )
@@ -723,13 +729,55 @@ pub fn open_carousel(state: AppState) {
             preferences::open_preferences(state_prefs.clone(), Some(win_prefs.upcast_ref()));
         });
     }
-    if let Some(fb) = flip_btn {
+    let flip_css = gtk4::CssProvider::new();
+    if let Some(display) = gdk::Display::default() {
+        gtk4::style_context_add_provider_for_display(
+            &display,
+            &flip_css,
+            gtk4::STYLE_PROVIDER_PRIORITY_APPLICATION + 1,
+        );
+    }
+    {
+        let flip_css = flip_css.clone();
+        window.connect_destroy(move |_| {
+            if let Some(display) = gdk::Display::default() {
+                gtk4::style_context_remove_provider_for_display(&display, &flip_css);
+            }
+        });
+    }
+
+    let do_flip: Option<Rc<dyn Fn()>> = if !position.is_vertical() {
         let at_bottom = Rc::new(Cell::new(position != CarouselPosition::Top));
+        let cur_dock_ty = Rc::new(Cell::new(0.0_f64));
+        let cur_preview_ty = Rc::new(Cell::new(0.0_f64));
+        let active_anim: Rc<RefCell<Option<adw::SpringAnimation>>> = Rc::new(RefCell::new(None));
+        let anim_gen = Rc::new(Cell::new(0_u64));
         let dock_flip = dock.clone();
         let preview_flip = preview_stage.clone();
         let frame_flip = content_frame.clone();
         let state_flip = state.clone();
-        fb.connect_clicked(move |_| {
+        let flip_css = flip_css.clone();
+
+        Some(Rc::new(move || {
+            let old_dock_y = dock_flip
+                .compute_bounds(&frame_flip)
+                .map(|b| f64::from(b.y()))
+                .unwrap_or(0.0);
+            let old_preview_y = preview_flip
+                .compute_bounds(&frame_flip)
+                .map(|b| f64::from(b.y()))
+                .unwrap_or(0.0);
+            let container_h = f64::from(frame_flip.height());
+            let dock_h = f64::from(dock_flip.height());
+            let prev_dock_ty = cur_dock_ty.get();
+            let prev_preview_ty = cur_preview_ty.get();
+
+            let my_gen = anim_gen.get().wrapping_add(1);
+            anim_gen.set(my_gen);
+            if let Some(prev_anim) = active_anim.borrow_mut().take() {
+                prev_anim.skip();
+            }
+
             let next_bottom = !at_bottom.get();
             at_bottom.set(next_bottom);
             let next_pos = if next_bottom {
@@ -742,23 +790,77 @@ pub fn open_carousel(state: AppState) {
                 cfg.carousel_position = next_pos;
                 let _ = cfg.save();
             }
-            let anim_cls = if next_bottom {
-                "entering-bottom"
-            } else {
-                "entering-top"
-            };
-            dock_flip.add_css_class(anim_cls);
+
+            let (delta_dock, delta_preview) = compute_flip_deltas(
+                old_dock_y,
+                old_preview_y,
+                prev_dock_ty,
+                prev_preview_ty,
+                container_h,
+                dock_h,
+                14.0,
+                next_bottom,
+            );
+
             configure_dock_placement(&dock_flip, next_pos);
             if next_bottom {
                 frame_flip.reorder_child_after(&dock_flip, Some(&preview_flip));
             } else {
                 frame_flip.reorder_child_after(&preview_flip, Some(&dock_flip));
             }
-            let dock_anim = dock_flip.clone();
-            glib::timeout_add_local_once(std::time::Duration::from_millis(16), move || {
-                dock_anim.remove_css_class(anim_cls);
+
+            dock_flip.add_css_class("flipping");
+            preview_flip.add_css_class("flipping");
+            cur_dock_ty.set(delta_dock);
+            cur_preview_ty.set(delta_preview);
+            apply_flip_css(&flip_css, delta_dock, delta_preview);
+
+            let flip_css_tick = flip_css.clone();
+            let cur_dock_tick = Rc::clone(&cur_dock_ty);
+            let cur_preview_tick = Rc::clone(&cur_preview_ty);
+            let target = adw::CallbackAnimationTarget::new(move |val| {
+                let d_ty = delta_dock * val;
+                let p_ty = delta_preview * val;
+                cur_dock_tick.set(d_ty);
+                cur_preview_tick.set(p_ty);
+                apply_flip_css(&flip_css_tick, d_ty, p_ty);
             });
-        });
+
+            let anim = adw::SpringAnimation::new(
+                &dock_flip,
+                1.0,
+                0.0,
+                adw::SpringParams::new(0.90, 1.0, 280.0),
+                target,
+            );
+
+            let anim_gen_done = Rc::clone(&anim_gen);
+            let dock_done = dock_flip.clone();
+            let preview_done = preview_flip.clone();
+            let cur_dock_done = Rc::clone(&cur_dock_ty);
+            let cur_preview_done = Rc::clone(&cur_preview_ty);
+            let flip_css_done = flip_css.clone();
+            let active_anim_done = Rc::clone(&active_anim);
+            anim.connect_done(move |_| {
+                if anim_gen_done.get() == my_gen {
+                    dock_done.remove_css_class("flipping");
+                    preview_done.remove_css_class("flipping");
+                    cur_dock_done.set(0.0);
+                    cur_preview_done.set(0.0);
+                    flip_css_done.load_from_string("");
+                    *active_anim_done.borrow_mut() = None;
+                }
+            });
+
+            *active_anim.borrow_mut() = Some(anim.clone());
+            anim.play();
+        }))
+    } else {
+        None
+    };
+
+    if let (Some(fb), Some(flip)) = (flip_btn, do_flip.as_ref().map(Rc::clone)) {
+        fb.connect_clicked(move |_| flip());
     }
 
     // Mouse / Trackpad scroll
@@ -853,6 +955,7 @@ pub fn open_carousel(state: AppState) {
     let do_edit_key = Rc::clone(&do_edit);
     let do_save_key = Rc::clone(&do_save);
     let do_delete_key = Rc::clone(&do_delete);
+    let do_flip_key = do_flip.clone();
     let state_key = state.clone();
 
     key_ctrl.connect_key_pressed(move |_, key, _, mods| {
@@ -897,6 +1000,12 @@ pub fn open_carousel(state: AppState) {
             gdk::Key::n | gdk::Key::N => {
                 win_key.close();
                 trigger_capture_flow(state_key.clone(), None);
+                glib::Propagation::Stop
+            }
+            gdk::Key::f | gdk::Key::F | gdk::Key::Tab if !ctrl => {
+                if let Some(flip) = &do_flip_key {
+                    flip();
+                }
                 glib::Propagation::Stop
             }
             gdk::Key::comma => {
@@ -976,6 +1085,36 @@ fn configure_dock_placement(dock: &gtk4::Box, position: CarouselPosition) {
     }
 }
 
+fn apply_flip_css(provider: &gtk4::CssProvider, dock_ty: f64, preview_ty: f64) {
+    let css = format!(
+        ".carousel-dock.flipping {{ transform: translateY({dock_ty:.2}px); }}\n\
+         .carousel-preview-stage.flipping {{ transform: translateY({preview_ty:.2}px); }}"
+    );
+    provider.load_from_string(&css);
+}
+
+#[allow(clippy::too_many_arguments)]
+fn compute_flip_deltas(
+    old_dock_y: f64,
+    old_preview_y: f64,
+    cur_dock_ty: f64,
+    cur_preview_ty: f64,
+    container_h: f64,
+    dock_h: f64,
+    spacing: f64,
+    next_bottom: bool,
+) -> (f64, f64) {
+    let (new_dock_y, new_preview_y) = if next_bottom {
+        ((container_h - dock_h).max(0.0), 0.0)
+    } else {
+        (0.0, dock_h + spacing)
+    };
+    (
+        (old_dock_y + cur_dock_ty) - new_dock_y,
+        (old_preview_y + cur_preview_ty) - new_preview_y,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -985,5 +1124,40 @@ mod tests {
         assert_eq!(outer_margins_from_size(1920, 1080), (96, 54));
         assert_eq!(outer_margins_from_size(2560, 1440), (128, 72));
         assert_eq!(outer_margins_from_size(640, 480), (40, 28));
+    }
+
+    #[test]
+    fn flip_deltas_top_bottom_and_midflight_reversal() {
+        let container_h = 900.0;
+        let dock_h = 240.0;
+        let spacing = 14.0;
+
+        // Top -> Bottom from rest
+        let (dd_tb, dp_tb) =
+            compute_flip_deltas(0.0, 254.0, 0.0, 0.0, container_h, dock_h, spacing, true);
+        assert_eq!(dd_tb, -660.0);
+        assert_eq!(dp_tb, 254.0);
+
+        // Bottom -> Top from rest
+        let (dd_bt, dp_bt) =
+            compute_flip_deltas(660.0, 0.0, 0.0, 0.0, container_h, dock_h, spacing, false);
+        assert_eq!(dd_bt, 660.0);
+        assert_eq!(dp_bt, -254.0);
+
+        // Mid-flight reversal while dock has animated halfway down from Top -> Bottom
+        // Visual dock y was 660 + (-330) = 330; reversing back to Top (new_dock_y = 0) -> delta +330.
+        // Visual preview y was 0 + 127 = 127; reversing back to Top (new_preview_y = 254) -> delta -127.
+        let (dd_mid, dp_mid) = compute_flip_deltas(
+            660.0,
+            0.0,
+            -330.0,
+            127.0,
+            container_h,
+            dock_h,
+            spacing,
+            false,
+        );
+        assert_eq!(dd_mid, 330.0);
+        assert_eq!(dp_mid, -127.0);
     }
 }

@@ -10,6 +10,16 @@
 
 Ein schnelles, flüssiges Screenshot-Werkzeug in **Rust** mit **GTK4 + Libadwaita**, speziell entwickelt für **Ubuntu Wayland (GNOME)** — inklusive automatischer Tastenkürzel-Erkennung für **GNOME**, **KDE Plasma**, **XFCE** und **Sway**.
 
+### Screenshots
+
+**Annotations-Editor**
+
+![VeloShot Annotations-Editor](docs/screenshots/VeloShot-Editor.png)
+
+**Verlaufs-Karussell**
+
+![VeloShot Verlaufs-Karussell](docs/screenshots/VeloShot-History.png)
+
 ### Funktionen
 
 - **Präzise Bereichsaufnahme & schwebende Mini-Leiste:** GPU-gerendertes Vollbild-Overlay über `xdg-desktop-portal` (`ashpd`) mit Vollbild-Fadenkreuz, **6×-Live-Lupe** und transparenter Mini-Leiste (**Auswahl**, **Monitor-Auswahl** mit Live-Hervorhebung, **Fenster** über GNOME-Portal, **3s/5s-Timer** sowie **Oben/Unten-Wechsel**), die beim Ziehen automatisch ausgeblendet wird.
@@ -31,8 +41,8 @@ Für den Build aus den Quellen werden GTK4- und Libadwaita-Header benötigt (`te
 
 ```bash
 sudo apt update && sudo apt install -y libgtk-4-dev libadwaita-1-dev
-# Optional für Offline-OCR:
-sudo apt install -y tesseract-ocr tesseract-ocr-deu
+# Optional für Offline-OCR (beliebige unterstützte Sprache über tesseract-ocr-<code>, z. B. deu, eng, ell, fra, spa …):
+sudo apt install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-deu
 ```
 
 ### Build & lokale Installation
@@ -86,6 +96,16 @@ snapcraft pack
 
 A fast, fluid screenshot tool written in **Rust** with **GTK4 + Libadwaita**, specifically designed for **Ubuntu Wayland (GNOME)** — with automatic shortcut setup for **GNOME**, **KDE Plasma**, **XFCE**, and **Sway**.
 
+### Screenshots
+
+**Annotation Editor**
+
+![VeloShot Annotation Editor](docs/screenshots/VeloShot-Editor.png)
+
+**Carousel History**
+
+![VeloShot Carousel History](docs/screenshots/VeloShot-History.png)
+
 ### Features
 
 - **Precision Region Capture & Floating Mini-Bar:** Fullscreen GPU-rendered overlay via `xdg-desktop-portal` (`ashpd`) with full-screen crosshair, **6× live zoom loupe**, and a translucent floating mini-bar (**Selection**, per-**Monitor** picker with live hover highlight, **Window** via GNOME portal, **3s/5s** timer, and **Top/Bottom** flip) that auto-fades while dragging.
@@ -107,8 +127,8 @@ GTK4 and Libadwaita development headers are required to build from source (`tess
 
 ```bash
 sudo apt update && sudo apt install -y libgtk-4-dev libadwaita-1-dev
-# Optional offline OCR support:
-sudo apt install -y tesseract-ocr tesseract-ocr-deu
+# Optional offline OCR support (any supported language via tesseract-ocr-<code>, e.g. eng, deu, ell, fra, spa …):
+sudo apt install -y tesseract-ocr tesseract-ocr-eng tesseract-ocr-deu
 ```
 
 ### Build & Local Desktop Installation

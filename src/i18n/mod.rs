@@ -36,6 +36,31 @@ pub enum ResolvedLang {
     Uk = 16,
 }
 
+impl ResolvedLang {
+    /// Returns the Ubuntu/Tesseract language code for `tesseract-ocr-<code>`.
+    pub fn tesseract_code(self) -> &'static str {
+        match self {
+            Self::En => "eng",
+            Self::De => "deu",
+            Self::El => "ell",
+            Self::Fr => "fra",
+            Self::Es => "spa",
+            Self::Nl => "nld",
+            Self::It => "ita",
+            Self::Pt => "por",
+            Self::Pl => "pol",
+            Self::Sv => "swe",
+            Self::Da => "dan",
+            Self::No => "nor",
+            Self::Fi => "fin",
+            Self::Cs => "ces",
+            Self::Hu => "hun",
+            Self::Ro => "ron",
+            Self::Uk => "ukr",
+        }
+    }
+}
+
 static ACTIVE_LANG: AtomicU8 = AtomicU8::new(ResolvedLang::En as u8);
 
 /// Resolves `Language` using `LC_ALL` / `LC_MESSAGES` / `LANG` when set to `Auto`.
@@ -67,7 +92,8 @@ pub fn set_language(lang: Language) {
     ACTIVE_LANG.store(resolve_language(lang) as u8, Ordering::Relaxed);
 }
 
-fn current_lang() -> ResolvedLang {
+/// Returns the currently active resolved application language.
+pub fn current_lang() -> ResolvedLang {
     match ACTIVE_LANG.load(Ordering::Relaxed) {
         1 => ResolvedLang::De,
         2 => ResolvedLang::El,
@@ -202,7 +228,7 @@ mod tests {
         "Size of toolbar and tool icons in the editor",
         "VeloShot v{VERSION}\nFast Ubuntu Wayland screenshot tool with live loupe, carousel history, and annotation editor.\n\nUSAGE:\n    veloshot [OPTIONS] [COMMAND]\n\nCOMMANDS:\n    (no command)  Start region capture directly (loupe + mini-bar) and keep tray active\n    capture       Start region capture immediately\n    history       Open carousel history\n    window        Open main hub window\n    settings      Open preferences dialog\n    daemon        Run background tray service quietly\n    quit          Quit running background instance cleanly\n\nOPTIONS:\n    --log         Also write GLib/GTK warnings to log file (or VELOSHOT_LOG=1)\n    --help, -h    Show this help message\n    --version, -V Show version information",
         "Log file",
-        "In Snap mode please install from a terminal: sudo apt install tesseract-ocr tesseract-ocr-deu",
+        "In Snap mode please install from a terminal:",
         "Could not start system installer (pkexec)",
         "Tesseract OCR installed — the OCR icon is now available in the editor",
         "Installation cancelled or exited without authorization",
@@ -350,7 +376,7 @@ mod tests {
         "Guide",
         "Show & copy install command",
         "Installing (password prompt)…",
-        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with German and English language data. Terminal command:",
+        "For text recognition in the editor, VeloShot uses \"tesseract-ocr\" with language data for your active language (plus English). Terminal command:",
         "Set up Tesseract OCR",
         "Close",
         "Copy Command",
