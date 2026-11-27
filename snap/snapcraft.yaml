@@ -1,20 +1,23 @@
 name: veloshot
 base: core24
 version: "0.1.0"
-summary: Schnelles Ubuntu-Wayland-Screenshot-Tool mit Verlaufs-Karussell
+summary: Fast Ubuntu Wayland screenshot tool with live loupe, carousel & editor
 description: |
-  VeloShot bietet unter Ubuntu Wayland (GNOME) eine präzise
-  Bereichsauswahl mit Live-Lupe, eine konfigurierbare Screenshot-Historie mit
-  flüssigem Karussell (Oben, Unten, Links, Rechts, Zentral) sowie einen
-  integrierten Nachbearbeitungs-Editor (Rechteck, Text, Sprechblase, Verwischen).
+  VeloShot is a fast, native screenshot tool for Ubuntu Wayland (GNOME) written
+  in Rust with GTK4 and Libadwaita. It features a 6x live zoom loupe,
+  an interactive 60+ FPS screenshot history carousel (Top, Bottom, Center with
+  spring-animated Top/Bottom flip), a full-featured annotation editor
+  (rectangles, arrows, highlighter, freehand, numbered steps, text, speech
+  bubbles, pixelate, spotlight, crop, Beautify frames, optional offline OCR),
+  and 17 European languages.
 
-grade: devel
+grade: stable
 confinement: strict
 icon: data/icons/hicolor/scalable/apps/io.github.konnospb.VeloShot.svg
 
 apps:
   veloshot:
-    command: usr/bin/veloshot
+    command: bin/veloshot
     extensions: [gnome]
     common-id: io.github.konnospb.VeloShot
     plugs:
@@ -29,10 +32,12 @@ parts:
   veloshot:
     plugin: rust
     source: .
+    rust-channel: "stable"
     build-packages:
       - pkg-config
       - libgtk-4-dev
       - libadwaita-1-dev
+      - libdbus-1-dev
     override-build: |
       craftctl default
       install -Dm644 data/io.github.konnospb.VeloShot.desktop \
