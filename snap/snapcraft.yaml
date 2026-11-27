@@ -1,0 +1,45 @@
+name: veloshot
+base: core24
+version: "0.1.0"
+summary: Schnelles Ubuntu-Wayland-Screenshot-Tool mit Verlaufs-Karussell
+description: |
+  VeloShot bietet unter Ubuntu Wayland (GNOME) eine Greenshot-ähnliche
+  Bereichsauswahl mit Live-Lupe, eine konfigurierbare Screenshot-Historie mit
+  flüssigem Karussell (Oben, Unten, Links, Rechts, Zentral) sowie einen
+  integrierten Nachbearbeitungs-Editor (Rechteck, Text, Sprechblase, Verwischen).
+
+grade: devel
+confinement: strict
+icon: data/icons/hicolor/scalable/apps/io.github.konnospb.VeloShot.svg
+
+apps:
+  veloshot:
+    command: usr/bin/veloshot
+    extensions: [gnome]
+    common-id: io.github.konnospb.VeloShot
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - home
+
+parts:
+  veloshot:
+    plugin: rust
+    source: .
+    build-packages:
+      - pkg-config
+      - libgtk-4-dev
+      - libadwaita-1-dev
+    override-build: |
+      craftctl default
+      install -Dm644 data/io.github.konnospb.VeloShot.desktop \
+        "$CRAFT_PART_INSTALL/usr/share/applications/io.github.konnospb.VeloShot.desktop"
+      install -Dm644 data/io.github.konnospb.VeloShot.metainfo.xml \
+        "$CRAFT_PART_INSTALL/usr/share/metainfo/io.github.konnospb.VeloShot.metainfo.xml"
+      install -Dm644 data/icons/hicolor/scalable/apps/io.github.konnospb.VeloShot.svg \
+        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/io.github.konnospb.VeloShot.svg"
+      install -Dm644 data/icons/hicolor/symbolic/apps/io.github.konnospb.VeloShot-symbolic.svg \
+        "$CRAFT_PART_INSTALL/usr/share/icons/hicolor/symbolic/apps/io.github.konnospb.VeloShot-symbolic.svg"
