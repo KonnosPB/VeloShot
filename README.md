@@ -36,7 +36,7 @@ Ein schnelles, flüssiges Screenshot-Werkzeug in **Rust** mit **GTK4 + Libadwait
 - **Einstellungen, Export & 17 europäische Sprachen:**
   - **Sprachen:** **Automatisch (Systemsprache)** plus **17 europäische Sprachen** (`English`, `Deutsch`, `Ελληνικά`, `Français`, `Español`, `Nederlands`, `Italiano`, `Português`, `Polski`, `Svenska`, `Dansk`, `Norsk`, `Suomi`, `Čeština`, `Magyar`, `Română`, `Українська`) mit sofortigem Live-Wechsel in den Einstellungen.
   - **Export & Dateinamen:** Wahl zwischen **PNG (Verlustfrei)** und **JPEG (Kleinere Datei)** (mit automatischem Alpha-Blending auf Weiß), Standard-Dateinamensmuster `<year>-<month>-<day>_<hour>-<minute>-<second>_Screenshot` (weitere Platzhalter: `<width>`, `<height>`), Standardordner (`~/Bilder/VeloShot` bzw. `~/Pictures/VeloShot`) und Verlaufs-Limit (`1..=200`).
-  - **Desktop-Tastenkürzel:** Automatische Erkennung und Einrichtung für **GNOME** (`gsettings`), **KDE Plasma**, **XFCE** und **Sway** inkl. komfortablem Schalter für die `Druck`-Taste.
+  - **Desktop-Tastenkürzel & Autostart:** Automatische Erkennung und Einrichtung für **GNOME** (`gsettings`), **KDE Plasma**, **XFCE** und **Sway** inkl. komfortablem Schalter für die `Druck`-Taste sowie **Autostart beim Anmelden** (`~/.config/autostart`).
 
 ### Systemvoraussetzungen (Ubuntu)
 
@@ -59,8 +59,9 @@ cargo build --release
 Weitere Optionen für [`install-local.sh`](install-local.sh):
 
 ```bash
-./install-local.sh --skip-build # Vorhandene target/release/veloshot ohne Neubau installieren
-./install-local.sh --symlink    # ~/.local/bin/veloshot auf target/release/veloshot verlinken
+./install-local.sh --skip-build   # Vorhandene target/release/veloshot ohne Neubau installieren
+./install-local.sh --symlink      # ~/.local/bin/veloshot auf target/release/veloshot verlinken
+./install-local.sh --no-autostart # Ohne XDG-Autostart-Eintrag installieren
 ```
 
 ### CLI-Befehle
@@ -122,7 +123,7 @@ A fast, fluid screenshot tool written in **Rust** with **GTK4 + Libadwaita**, sp
 - **Preferences, Export & 17 European Languages:**
   - **Languages:** **Auto (System Locale)** plus **17 European languages** (`English`, `Deutsch`, `Ελληνικά`, `Français`, `Español`, `Nederlands`, `Italiano`, `Português`, `Polski`, `Svenska`, `Dansk`, `Norsk`, `Suomi`, `Čeština`, `Magyar`, `Română`, `Українська`) with instant live switching in Preferences.
   - **Export & Naming:** Choose between **PNG (Lossless)** and **JPEG (Smaller file)** (with automatic alpha compositing onto white), date-first default filename pattern `<year>-<month>-<day>_<hour>-<minute>-<second>_Screenshot` (plus `<width>`, `<height>`), custom save folder (defaults to `~/Pictures/VeloShot` / `~/Bilder/VeloShot`), and history limit (`1..=200`).
-  - **Desktop Shortcuts:** Automatic detection and configuration for **GNOME** (`gsettings`), **KDE Plasma**, **XFCE**, and **Sway**, including a one-click `Print` key redirect toggle.
+  - **Desktop Shortcuts & Autostart:** Automatic detection and configuration for **GNOME** (`gsettings`), **KDE Plasma**, **XFCE**, and **Sway**, including a one-click `Print` key redirect toggle and **Start automatically at login** (`~/.config/autostart`).
 
 ### System Prerequisites (Ubuntu)
 
@@ -145,8 +146,9 @@ cargo build --release
 Additional flags for [`install-local.sh`](install-local.sh):
 
 ```bash
-./install-local.sh --skip-build # Install existing target/release/veloshot without rebuilding
-./install-local.sh --symlink    # Symlink ~/.local/bin/veloshot to target/release/veloshot
+./install-local.sh --skip-build   # Install existing target/release/veloshot without rebuilding
+./install-local.sh --symlink      # Symlink ~/.local/bin/veloshot to target/release/veloshot
+./install-local.sh --no-autostart # Skip installing the XDG autostart entry
 ```
 
 ### CLI Commands

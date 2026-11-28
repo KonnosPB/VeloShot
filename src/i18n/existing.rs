@@ -1395,6 +1395,92 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
             "Installatieopdracht gekopieerd",
             "Comando di installazione copiato",
         ),
+        "Screenshot Permission — VeloShot" => pick(
+            lang,
+            "Άδεια στιγμιότυπου — VeloShot",
+            "Autorisation de capture — VeloShot",
+            "Permiso de captura — VeloShot",
+            "Schermafdruktoestemming — VeloShot",
+            "Permesso schermata — VeloShot",
+        ),
+        "Screenshot Permission Required" => pick(
+            lang,
+            "Απαιτείται άδεια στιγμιότυπου",
+            "Autorisation de capture requise",
+            "Se requiere permiso de captura",
+            "Schermafdruktoestemming vereist",
+            "Permesso per schermate richiesto",
+        ),
+        "Please choose \"Allow\" once in the system dialog so VeloShot can capture screenshots directly." => {
+            pick(
+                lang,
+                "Επιλέξτε «Να επιτρέπεται» μία φορά στο παράθυρο συστήματος ώστε το VeloShot να λαμβάνει στιγμιότυπα απευθείας.",
+                "Veuillez choisir « Autoriser » une fois dans la boîte de dialogue système afin que VeloShot puisse capturer directement.",
+                "Elige «Permitir» una vez en el diálogo del sistema para que VeloShot pueda capturar directamente.",
+                "Kies eenmalig \"Toestaan\" in het systeemvenster zodat VeloShot direct schermafdrukken kan maken.",
+                "Scegli «Consenti» una volta nella finestra di sistema affinché VeloShot possa acquisire direttamente.",
+            )
+        }
+        "Start automatically at login" => pick(
+            lang,
+            "Αυτόματη εκκίνηση κατά τη σύνδεση",
+            "Démarrer automatiquement à la connexion",
+            "Iniciar automáticamente al iniciar sesión",
+            "Automatisch starten bij aanmelden",
+            "Avvia automaticamente all'accesso",
+        ),
+        "Starts the VeloShot background daemon (tray icon &amp; shortcuts) automatically after reboot" => {
+            pick(
+                lang,
+                "Εκκινεί αυτόματα την υπηρεσία VeloShot (εικονίδιο &amp; συντομεύσεις) μετά την επανεκκίνηση",
+                "Démarre automatiquement le service VeloShot (icône &amp; raccourcis) après redémarrage",
+                "Inicia automáticamente el servicio VeloShot (icono &amp; atajos) tras reiniciar",
+                "Start de VeloShot-achtergronddienst (systeemvak &amp; sneltoetsen) automatisch na herstart",
+                "Avvia automaticamente il servizio VeloShot (icona &amp; scorciatoie) dopo il riavvio",
+            )
+        }
+        "Autostart enabled" => pick(
+            lang,
+            "Η αυτόματη εκκίνηση ενεργοποιήθηκε",
+            "Démarrage automatique activé",
+            "Inicio automático activado",
+            "Automatisch starten ingeschakeld",
+            "Avvio automatico attivato",
+        ),
+        "Autostart disabled" => pick(
+            lang,
+            "Η αυτόματη εκκίνηση απενεργοποιήθηκε",
+            "Démarrage automatique désactivé",
+            "Inicio automático desactivado",
+            "Automatisch starten uitgeschakeld",
+            "Avvio automatico disattivato",
+        ),
+        "In Snap mode, please add VeloShot in GNOME Startup Applications." => pick(
+            lang,
+            "Σε λειτουργία Snap, προσθέστε το VeloShot στις Εφαρμογές εκκίνησης του GNOME.",
+            "En mode Snap, veuillez ajouter VeloShot dans Applications au démarrage de GNOME.",
+            "En modo Snap, añade VeloShot en Aplicaciones al inicio de GNOME.",
+            "Voeg in Snap-modus VeloShot toe in GNOME Opstarttoepassingen.",
+            "In modalità Snap, aggiungi VeloShot nelle Applicazioni d'avvio di GNOME.",
+        ),
+        "Screenshot Permission Denied" => pick(
+            lang,
+            "Η άδεια στιγμιότυπου απορρίφθηκε",
+            "Autorisation de capture refusée",
+            "Permiso de captura denegado",
+            "Schermafdruktoestemming geweigerd",
+            "Permesso schermata negato",
+        ),
+        "VeloShot is currently not allowed to take screenshots. Please enable Screenshots in GNOME Settings → Apps → VeloShot and try again." => {
+            pick(
+                lang,
+                "Το VeloShot δεν έχει άδεια για στιγμιότυπα. Ενεργοποιήστε τα στις Ρυθμίσεις GNOME → Εφαρμογές → VeloShot και δοκιμάστε ξανά.",
+                "VeloShot n'est pas autorisé à prendre des captures. Activez Captures d'écran dans Paramètres GNOME → Applications → VeloShot et réessayez.",
+                "VeloShot no tiene permiso para capturas. Activa Capturas en Configuración de GNOME → Aplicaciones → VeloShot e inténtalo de nuevo.",
+                "VeloShot mag momenteel geen schermafdrukken maken. Schakel Schermafdrukken in via GNOME-instellingen → Apps → VeloShot en probeer opnieuw.",
+                "VeloShot non è autorizzato a scattare schermate. Attiva Schermate in Impostazioni GNOME → App → VeloShot e riprova.",
+            )
+        }
 
         _ => None,
     }

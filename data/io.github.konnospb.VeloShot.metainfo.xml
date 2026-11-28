@@ -20,6 +20,11 @@
   </provides>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.1.1" date="2026-11-28">
+      <description>
+        <p>Autostart-Einstellung beim Anmelden, sauberer GNOME-Wayland-Berechtigungs-Flow, headless veloshot quit ohne Segfault sowie Snapcraft-core24-Build.</p>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-11-26">
       <description>
         <p>Erste Version mit Portal-Aufnahme, 6x-Lupe, 5-Positionen-Karussell und Annotations-Editor.</p>

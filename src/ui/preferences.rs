@@ -136,6 +136,40 @@ fn build_preferences_page(
         let _ = cfg.save();
     });
     lang_group.add(&icon_size_row);
+
+    let autostart_row = adw::SwitchRow::builder()
+        .title(tr(
+            "Automatisch beim Anmelden starten",
+            "Start automatically at login",
+        ))
+        .subtitle(tr(
+            "Startet den VeloShot-Hintergrunddienst (Tray-Symbol &amp; Kürzel) nach dem Neustart automatisch",
+            "Starts the VeloShot background daemon (tray icon &amp; shortcuts) automatically after reboot",
+        ))
+        .active(crate::autostart::is_autostart_enabled())
+        .sensitive(!shortcuts::is_running_in_snap())
+        .build();
+    let autostart_guard = Rc::new(Cell::new(false));
+    let dlg_autostart = Rc::clone(&dialog_rc);
+    autostart_row.connect_active_notify(move |row| {
+        if autostart_guard.get() {
+            return;
+        }
+        let target = row.is_active();
+        match crate::autostart::set_autostart_enabled(target) {
+            Ok(msg) => dlg_autostart.add_toast(plain_toast(&msg)),
+            Err(err) => {
+                autostart_guard.set(true);
+                row.set_active(!target);
+                autostart_guard.set(false);
+                dlg_autostart.add_toast(plain_toast(&format!(
+                    "{}: {err}",
+                    tr("Einrichtungsfehler", "Setup error")
+                )));
+            }
+        }
+    });
+    lang_group.add(&autostart_row);
     page.add(&lang_group);
 
     // --- Group 1: Karussell & Historie ---
