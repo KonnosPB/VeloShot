@@ -1,80 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
   <defs>
-    <!-- GNOME HIG base bevel + rich sapphire-to-indigo gradient -->
-    <linearGradient id="baseBevel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#1a5fb4"/>
-      <stop offset="100%" stop-color="#141826"/>
-    </linearGradient>
-    <linearGradient id="cardBg" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#3584e4"/>
-      <stop offset="58%" stop-color="#1c71d8"/>
-      <stop offset="100%" stop-color="#241f31"/>
-    </linearGradient>
-    <linearGradient id="lensOuter" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.96"/>
-      <stop offset="100%" stop-color="#cfe4ff" stop-opacity="0.88"/>
-    </linearGradient>
-    <radialGradient id="lensGlass" cx="38%" cy="34%" r="68%">
-      <stop offset="0%" stop-color="#99c1f1"/>
-      <stop offset="45%" stop-color="#1c71d8"/>
-      <stop offset="100%" stop-color="#0f172a"/>
-    </radialGradient>
-    <linearGradient id="ubuntuGlint" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff9f43"/>
-      <stop offset="100%" stop-color="#e66100"/>
-    </linearGradient>
-    <linearGradient id="carouselCard" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.34"/>
-      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#5b46d6"/>
     </linearGradient>
   </defs>
 
-  <!-- Soft ground shadow -->
-  <rect x="12" y="18" width="104" height="102" rx="26" fill="#000000" fill-opacity="0.24"/>
+  <!-- Subtle ground shadow -->
+  <rect x="4" y="8" width="120" height="118" rx="26" fill="#000000" fill-opacity="0.18"/>
 
-  <!-- 3D GNOME HIG bottom bevel -->
-  <rect x="12" y="14" width="104" height="102" rx="26" fill="url(#baseBevel)"/>
+  <!-- Full-bodied rounded square -->
+  <rect x="4" y="4" width="120" height="118" rx="26" fill="url(#bg)"/>
 
-  <!-- Main rounded squircle card -->
-  <rect x="12" y="10" width="104" height="102" rx="26" fill="url(#cardBg)"/>
-
-  <!-- Subtle top specular highlight -->
-  <rect x="13" y="11" width="102" height="100" rx="25" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="1.5"/>
-
-  <!-- Fanning carousel cards behind main viewfinder -->
-  <g transform="translate(64 64) rotate(-11)">
-    <rect x="-42" y="-32" width="54" height="38" rx="7" fill="url(#carouselCard)" stroke="#ffffff" stroke-opacity="0.30" stroke-width="1.2"/>
-  </g>
-  <g transform="translate(64 64) rotate(11)">
-    <rect x="-12" y="-32" width="54" height="38" rx="7" fill="url(#carouselCard)" stroke="#ffffff" stroke-opacity="0.30" stroke-width="1.2"/>
+  <!-- Bold viewfinder corner brackets -->
+  <g fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 26 46 V 32 Q 26 26 32 26 H 46"/>
+    <path d="M 82 26 H 96 Q 102 26 102 32 V 46"/>
+    <path d="M 26 80 V 94 Q 26 100 32 100 H 46"/>
+    <path d="M 82 100 H 96 Q 102 100 102 94 V 80"/>
   </g>
 
-  <!-- Center viewfinder glass frame -->
-  <rect x="27" y="29" width="74" height="56" rx="11" fill="#0d1526" fill-opacity="0.42"/>
-
-  <!-- Crisp corner viewfinder brackets -->
-  <g fill="none" stroke="#ffffff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 27 43 L 27 35 Q 27 29 33 29 L 41 29"/>
-    <path d="M 87 29 L 95 29 Q 101 29 101 35 L 101 43"/>
-    <path d="M 27 71 L 27 79 Q 27 85 33 85 L 41 85"/>
-    <path d="M 87 85 L 95 85 Q 101 85 101 79 L 101 71"/>
-  </g>
-
-  <!-- Precision camera lens + subtle Ubuntu orange accent glint -->
-  <circle cx="64" cy="57" r="19" fill="url(#lensOuter)"/>
-  <circle cx="64" cy="57" r="13.5" fill="url(#lensGlass)"/>
-  <circle cx="58.5" cy="51.5" r="4.2" fill="#ffffff" fill-opacity="0.72"/>
-  <circle cx="70" cy="63" r="2.2" fill="url(#ubuntuGlint)"/>
-
-  <!-- Fine center crosshair -->
-  <g stroke="#ffffff" stroke-opacity="0.82" stroke-width="1.5" stroke-linecap="round">
-    <line x1="64" y1="53" x2="64" y2="61"/>
-    <line x1="60" y1="57" x2="68" y2="57"/>
-  </g>
-
-  <!-- Bottom carousel strip indicator -->
-  <rect x="33" y="94" width="16" height="9" rx="3" fill="#ffffff" fill-opacity="0.45"/>
-  <rect x="53" y="92" width="22" height="12" rx="3.5" fill="#ffffff" fill-opacity="0.96"/>
-  <rect x="79" y="94" width="16" height="9" rx="3" fill="#ffffff" fill-opacity="0.45"/>
+  <!-- Centered aperture ring + accent shutter dot -->
+  <circle cx="64" cy="63" r="18" fill="none" stroke="#ffffff" stroke-width="8"/>
+  <circle cx="64" cy="63" r="6.5" fill="#ff8a2b"/>
 </svg>

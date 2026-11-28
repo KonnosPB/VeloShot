@@ -12,7 +12,7 @@ use std::rc::Rc;
 
 use gtk4::{
     CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, gdk,
-    prelude::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+    prelude::{BoxExt, ButtonExt, GtkApplicationExt, GtkWindowExt, WidgetExt},
 };
 use libadwaita as adw;
 
@@ -316,6 +316,8 @@ pub fn plain_toast(message: &str) -> adw::Toast {
     adw::Toast::new(&gtk4::glib::markup_escape_text(message))
 }
 
+const PERMISSION_WINDOW_NAME: &str = "veloshot-permission-window";
+
 /// Briefly focuses a small VeloShot window so GNOME Shell permits the portal's one-time
 /// screenshot permission dialog ("Only the focused app is allowed to show a system access dialog"),
 /// then closes it and takes a clean silent fullscreen capture.
@@ -323,9 +325,20 @@ fn request_screenshot_permission_and_capture(
     state: AppState,
     parent_to_hide: Option<gtk4::Window>,
 ) {
+    if let Some(existing) = state
+        .app
+        .windows()
+        .into_iter()
+        .find(|w| w.widget_name() == PERMISSION_WINDOW_NAME)
+    {
+        existing.present();
+        return;
+    }
+
     let spinner = gtk4::Spinner::builder().spinning(true).build();
     let status = adw::StatusPage::builder()
         .icon_name(APP_ID)
+        .css_classes(["compact"])
         .title(tr(
             "Screenshot-Berechtigung erforderlich",
             "Screenshot Permission Required",
@@ -335,6 +348,7 @@ fn request_screenshot_permission_and_capture(
             "Please choose \"Allow\" once in the system dialog so VeloShot can capture screenshots directly.",
         ))
         .child(&spinner)
+        .vexpand(true)
         .build();
 
     let content = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
@@ -343,12 +357,13 @@ fn request_screenshot_permission_and_capture(
 
     let perm_win = adw::Window::builder()
         .application(&state.app)
+        .name(PERMISSION_WINDOW_NAME)
         .title(tr(
             "Screenshot-Berechtigung — VeloShot",
             "Screenshot Permission — VeloShot",
         ))
         .default_width(440)
-        .default_height(280)
+        .default_height(320)
         .resizable(false)
         .content(&content)
         .build();
