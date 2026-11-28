@@ -12,7 +12,9 @@ use crate::shortcuts::is_running_in_snap;
 
 /// Returns the user's XDG autostart `.desktop` file path for VeloShot.
 pub fn autostart_file_path() -> PathBuf {
-    let base = dirs::config_dir().unwrap_or_else(|| PathBuf::from("."));
+    let base = dirs::config_dir()
+        .or_else(|| dirs::home_dir().map(|h| h.join(".config")))
+        .unwrap_or_else(|| PathBuf::from("."));
     base.join("autostart").join(format!("{APP_ID}.desktop"))
 }
 

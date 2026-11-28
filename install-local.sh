@@ -89,6 +89,8 @@ Terminal=false
 Categories=Utility;
 X-GNOME-Autostart-enabled=true
 EOF
+else
+    rm -f ~/.config/autostart/io.github.konnospb.VeloShot.desktop
 fi
 
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then

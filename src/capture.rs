@@ -102,6 +102,14 @@ impl std::fmt::Display for CaptureError {
     }
 }
 
+fn map_portal_error(err: ashpd::Error) -> CaptureError {
+    match err {
+        ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled) => CaptureError::Cancelled,
+        ashpd::Error::Response(other) => CaptureError::PermissionRequired(other.to_string()),
+        other => CaptureError::Other(other.into()),
+    }
+}
+
 /// Captures a fullscreen screenshot silently using `xdg-desktop-portal`.
 ///
 /// Never falls back to `interactive(true)` (which would launch the desktop's own
@@ -114,17 +122,9 @@ pub async fn capture_fullscreen_async() -> std::result::Result<RgbaImage, Captur
         .modal(true)
         .send()
         .await
-        .map_err(|err| match err {
-            ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled) => {
-                CaptureError::Cancelled
-            }
-            other => CaptureError::PermissionRequired(other.to_string()),
-        })?;
+        .map_err(map_portal_error)?;
 
-    let response = req.response().map_err(|err| match err {
-        ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled) => CaptureError::Cancelled,
-        other => CaptureError::PermissionRequired(other.to_string()),
-    })?;
+    let response = req.response().map_err(map_portal_error)?;
 
     load_portal_response(response, started_at)
         .await
