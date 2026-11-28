@@ -51,8 +51,8 @@ Linux binaries are forward-compatible with newer `glibc` versions. Building on `
   - `grade: stable` (required for `candidate` and `stable` channels).
   - `confinement: strict` with `extensions: [gnome]` and plugs `desktop`, `desktop-legacy`, `wayland`, `x11`, `opengl`, `home`.
   - `apps.veloshot.command: bin/veloshot` (where Snapcraft's `core24` `rust` plugin installs the binary).
-  - `rust-channel: "stable"` with `build-snaps: [rustup/latest/stable]` (and **no** `rust-deps` part): Snapcraft 9 (`core24`) installs the official `rustup` snap during `Installing build-snaps`, selects the `stable` toolchain (supporting `edition = "2024"`), and sets `PATH`. Do **not** combine `after: [rust-deps]` with `rust-channel: "stable"`, as `craft-parts` rejects that combination during environment validation.
-  - `build-packages`: `pkg-config`, `libgtk-4-dev`, `libadwaita-1-dev`, `libdbus-1-dev`.
+  - `parts.rust-deps` + `after: [rust-deps]` + `rust-channel: "none"` + `PATH: "$HOME/.cargo/bin:$PATH"`: `rust-deps` downloads and runs `rustup` (`stable`, minimal profile) during `override-build`, while `rust-channel: "none"` tells Snapcraft 9 (`core24`) to skip its own `rustup` validation/pull steps and use the provisioned `cargo`/`rustc` directly. Do **not** set `rust-channel: "stable"` or omit `rust-channel` when using `after: [rust-deps]`.
+  - `build-packages`: `pkg-config`, `libgtk-4-dev`, `libadwaita-1-dev`, `libdbus-1-dev` (plus `curl` and `build-essential` in `rust-deps`).
 - **Store authentication:** Stored in GitHub repository secret **`SNAPCRAFT_STORE_CREDENTIALS`** (generated once via `snapcraft export-login --snaps=veloshot --acls package_access,package_push,package_update,package_release -`).
 - **Snapcraft dashboard note:** The **Builds / Listing / Releases** management UI only unlocks after Revision #1 has been uploaded to the Snap Store (e.g., by running `Build and Publish Snap` manually with channel `edge`).
 
