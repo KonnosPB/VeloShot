@@ -53,6 +53,9 @@ parts:
       - libgtk-4-dev
       - libadwaita-1-dev
       - libdbus-1-dev
+    override-pull: |
+      export PATH="$HOME/.cargo/bin:$PATH"
+      craftctl default
     override-build: |
       craftctl default
       install -Dm644 data/io.github.konnospb.VeloShot.desktop \
