@@ -46,6 +46,7 @@ parts:
     plugin: rust
     source: .
     after: [rust-deps]
+    rust-channel: "none"
     build-environment:
       - PATH: "$HOME/.cargo/bin:$PATH"
     build-packages:
