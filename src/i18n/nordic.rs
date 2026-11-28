@@ -1151,6 +1151,82 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
             "Installasjonskommando kopiert til utklippstavle",
             "Asennuskomento kopioitu leikepöydälle",
         ),
+        "Screenshot Permission — VeloShot" => pick(
+            lang,
+            "Skärmdumpsbehörighet — VeloShot",
+            "Skærmbilledetilladelse — VeloShot",
+            "Skjermbildetillatelse — VeloShot",
+            "Kuvakaappauslupa — VeloShot",
+        ),
+        "Screenshot Permission Required" => pick(
+            lang,
+            "Skärmdumpsbehörighet krävs",
+            "Skærmbilledetilladelse påkrævet",
+            "Skjermbildetillatelse kreves",
+            "Kuvakaappauslupa vaaditaan",
+        ),
+        "Please choose \"Allow\" once in the system dialog so VeloShot can capture screenshots directly." => {
+            pick(
+                lang,
+                "Välj \"Tillåt\" en gång i systemdialogen så att VeloShot kan ta skärmdumpar direkt.",
+                "Vælg \"Tillad\" én gang i systemdialogen, så VeloShot kan tage skærmbilleder direkte.",
+                "Velg \"Tillat\" én gang i systemdialogen slik at VeloShot kan ta skjermbilder direkte.",
+                "Valitse \"Salli\" kerran järjestelmäikkunassa, jotta VeloShot voi kaapata kuvakaappauksia suoraan.",
+            )
+        }
+        "Start automatically at login" => pick(
+            lang,
+            "Starta automatiskt vid inloggning",
+            "Start automatisk ved login",
+            "Start automatisk ved innlogging",
+            "Käynnistä automaattisesti kirjautuessa",
+        ),
+        "Starts the VeloShot background daemon (tray icon &amp; shortcuts) automatically after reboot" => {
+            pick(
+                lang,
+                "Startar VeloShots bakgrundstjänst (ikon &amp; genvägar) automatiskt efter omstart",
+                "Starter VeloShots baggrundstjeneste (ikon &amp; genveje) automatisk efter genstart",
+                "Starter VeloShots bakgrunnstjeneste (ikon &amp; snarveier) automatisk etter omstart",
+                "Käynnistää VeloShotin taustapalvelun (kuvake &amp; pikanäppäimet) automaattisesti uudelleenkäynnistyksen jälkeen",
+            )
+        }
+        "Autostart enabled" => pick(
+            lang,
+            "Automatisk start aktiverad",
+            "Automatisk start aktiveret",
+            "Automatisk oppstart aktivert",
+            "Automaattinen käynnistys käytössä",
+        ),
+        "Autostart disabled" => pick(
+            lang,
+            "Automatisk start inaktiverad",
+            "Automatisk start deaktiveret",
+            "Automatisk oppstart deaktivert",
+            "Automaattinen käynnistys pois käytöstä",
+        ),
+        "In Snap mode, please add VeloShot in GNOME Startup Applications." => pick(
+            lang,
+            "I Snap-läge, lägg till VeloShot i GNOME Uppstartsprogram.",
+            "I Snap-tilstand skal du tilføje VeloShot i GNOME Opstartsprogrammer.",
+            "I Snap-modus må du legge til VeloShot i GNOME Oppstartsprogrammer.",
+            "Lisää Snap-tilassa VeloShot GNOME:n Käynnistyvät sovellukset -asetuksiin.",
+        ),
+        "Screenshot Permission Denied" => pick(
+            lang,
+            "Skärmdumpsbehörighet nekad",
+            "Skærmbilledetilladelse nægtet",
+            "Skjermbildetillatelse avslått",
+            "Kuvakaappauslupa evätty",
+        ),
+        "VeloShot is currently not allowed to take screenshots. Please enable Screenshots in GNOME Settings → Apps → VeloShot and try again." => {
+            pick(
+                lang,
+                "VeloShot har inte behörighet att ta skärmdumpar. Aktivera Skärmdumpar i GNOME Inställningar → Appar → VeloShot och försök igen.",
+                "VeloShot må i øjeblikket ikke tage skærmbilleder. Aktivér Skærmbilleder i GNOME Indstillinger → Apps → VeloShot og prøv igen.",
+                "VeloShot har for øyeblikket ikke tillatelse til å ta skjermbilder. Aktiver Skjermbilder i GNOME Innstillinger → Apper → VeloShot og prøv igjen.",
+                "VeloShotilla ei ole lupaa ottaa kuvakaappauksia. Ota Kuvakaappaukset käyttöön GNOME-asetukset → Sovellukset → VeloShot ja yritä uudelleen.",
+            )
+        }
 
         _ => None,
     }

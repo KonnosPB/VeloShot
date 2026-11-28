@@ -5,6 +5,7 @@ cd "$(dirname "$(readlink -f "$0")")"
 
 SKIP_BUILD=0
 USE_SYMLINK=0
+ENABLE_AUTOSTART=1
 
 for arg in "$@"; do
     case "$arg" in
@@ -14,17 +15,22 @@ for arg in "$@"; do
         --symlink)
             USE_SYMLINK=1
             ;;
+        --no-autostart)
+            ENABLE_AUTOSTART=0
+            ;;
         -h|--help)
             cat <<'EOF'
 Usage: ./install-local.sh [OPTIONS]
 
 Builds (unless --skip-build) and installs VeloShot into ~/.local, stops any
-older background daemon, updates desktop/icon caches, and starts veloshot daemon.
+older background daemon, configures XDG autostart (unless --no-autostart),
+updates desktop/icon caches, and starts veloshot daemon.
 
 Options:
-  --skip-build   Use existing target/release/veloshot without rebuilding
-  --symlink      Symlink ~/.local/bin/veloshot to target/release/veloshot
-  -h, --help     Show this help
+  --skip-build     Use existing target/release/veloshot without rebuilding
+  --symlink        Symlink ~/.local/bin/veloshot to target/release/veloshot
+  --no-autostart   Do not install ~/.config/autostart/io.github.konnospb.VeloShot.desktop
+  -h, --help       Show this help
 EOF
             exit 0
             ;;
@@ -69,6 +75,23 @@ install -Dm644 data/icons/hicolor/scalable/apps/io.github.konnospb.VeloShot.svg 
     ~/.local/share/icons/hicolor/scalable/apps/io.github.konnospb.VeloShot.svg
 install -Dm644 data/icons/hicolor/symbolic/apps/io.github.konnospb.VeloShot-symbolic.svg \
     ~/.local/share/icons/hicolor/symbolic/apps/io.github.konnospb.VeloShot-symbolic.svg
+
+if [[ "$ENABLE_AUTOSTART" -eq 1 ]]; then
+    mkdir -p ~/.config/autostart
+    cat > ~/.config/autostart/io.github.konnospb.VeloShot.desktop <<EOF
+[Desktop Entry]
+Type=Application
+Name=VeloShot
+Comment=Fast Ubuntu Wayland screenshot tool
+Exec="$HOME/.local/bin/veloshot" daemon
+Icon=io.github.konnospb.VeloShot
+Terminal=false
+Categories=Utility;
+X-GNOME-Autostart-enabled=true
+EOF
+else
+    rm -f ~/.config/autostart/io.github.konnospb.VeloShot.desktop
+fi
 
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then
     gtk-update-icon-cache -f -t ~/.local/share/icons/hicolor >/dev/null 2>&1 || true

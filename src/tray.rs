@@ -171,39 +171,24 @@ fn render_branded_tray_icon(size: i32) -> Icon {
         let _ = cr.paint();
         cr.set_operator(cairo::Operator::Over);
 
-        let margin = s * 0.04;
-        let box_s = s - margin * 2.0;
-        let radius = s * 0.24;
+        let margin = 0.0;
+        let box_s = s;
+        let radius = s * 0.20;
 
-        // Vivid GNOME Blue -> Royal Violet squircle badge
+        // Clean GNOME Blue -> Indigo squircle badge
         draw_rounded_rect(&cr, margin, margin, box_s, box_s, radius);
         let bg = cairo::LinearGradient::new(0.0, 0.0, s, s);
         bg.add_color_stop_rgba(0.0, 0.208, 0.518, 0.894, 1.0); // #3584e4
-        bg.add_color_stop_rgba(1.0, 0.471, 0.220, 0.710, 1.0); // #7838b5
+        bg.add_color_stop_rgba(1.0, 0.357, 0.275, 0.839, 1.0); // #5b46d6
         let _ = cr.set_source(&bg);
-        let _ = cr.fill_preserve();
-
-        // Crisp subtle highlight rim
-        cr.set_source_rgba(1.0, 1.0, 1.0, 0.24);
-        cr.set_line_width((s * 0.038).max(1.0));
-        let _ = cr.stroke();
-
-        // Frosted inner rotated card accent for depth
-        cr.save().ok();
-        cr.translate(s * 0.5, s * 0.5);
-        cr.rotate(-0.14);
-        let card_s = s * 0.62;
-        draw_rounded_rect(&cr, -card_s * 0.5, -card_s * 0.5, card_s, card_s, s * 0.10);
-        cr.set_source_rgba(1.0, 1.0, 1.0, 0.16);
         let _ = cr.fill();
-        cr.restore().ok();
 
-        // Crisp white viewfinder corner brackets
-        let p0 = s * 0.21;
-        let p1 = s * 0.79;
-        let arm = s * 0.15;
-        cr.set_source_rgba(1.0, 1.0, 1.0, 0.96);
-        cr.set_line_width((s * 0.068).max(1.4));
+        // Bold white viewfinder corner brackets
+        let p0 = s * 0.19;
+        let p1 = s * 0.81;
+        let arm = s * 0.16;
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.98);
+        cr.set_line_width((s * 0.09).max(1.9));
         cr.set_line_cap(cairo::LineCap::Round);
         cr.set_line_join(cairo::LineJoin::Round);
         for (cx, cy, dx, dy) in [
@@ -218,42 +203,16 @@ fn render_branded_tray_icon(size: i32) -> Icon {
             let _ = cr.stroke();
         }
 
-        // Centered dark metallic camera lens + luminous cyan rim
+        // Clean centered aperture ring + subtle warm accent dot
         let cx = s * 0.5;
         let cy = s * 0.5;
-        let lens_r = s * 0.215;
-        cr.arc(cx, cy, lens_r, 0.0, std::f64::consts::TAU);
-        cr.set_source_rgba(0.094, 0.106, 0.141, 1.0); // #181b24
-        let _ = cr.fill_preserve();
-        cr.set_source_rgba(0.60, 0.757, 0.945, 0.92); // #99c1f1
-        cr.set_line_width((s * 0.045).max(1.0));
+        cr.arc(cx, cy, s * 0.155, 0.0, std::f64::consts::TAU);
+        cr.set_source_rgba(1.0, 1.0, 1.0, 0.98);
+        cr.set_line_width((s * 0.078).max(1.7));
         let _ = cr.stroke();
 
-        // Inner lens ring
-        cr.arc(cx, cy, lens_r * 0.58, 0.0, std::f64::consts::TAU);
-        cr.set_source_rgba(0.60, 0.757, 0.945, 0.36);
-        cr.set_line_width((s * 0.025).max(0.75));
-        let _ = cr.stroke();
-
-        // Warm Ubuntu-orange aperture glint + crisp specular highlight
-        cr.arc(
-            cx + lens_r * 0.34,
-            cy + lens_r * 0.32,
-            (s * 0.045).max(1.1),
-            0.0,
-            std::f64::consts::TAU,
-        );
-        cr.set_source_rgba(1.0, 0.471, 0.0, 0.95); // #ff7800
-        let _ = cr.fill();
-
-        cr.arc(
-            cx - lens_r * 0.28,
-            cy - lens_r * 0.30,
-            (s * 0.036).max(0.9),
-            0.0,
-            std::f64::consts::TAU,
-        );
-        cr.set_source_rgba(1.0, 1.0, 1.0, 0.88);
+        cr.arc(cx, cy, (s * 0.058).max(1.4), 0.0, std::f64::consts::TAU);
+        cr.set_source_rgba(1.0, 0.541, 0.169, 1.0); // #ff8a2b
         let _ = cr.fill();
     }
 

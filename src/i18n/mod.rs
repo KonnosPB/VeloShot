@@ -378,6 +378,16 @@ mod tests {
         "Close",
         "Copy Command",
         "Install command copied to clipboard",
+        "Screenshot Permission — VeloShot",
+        "Screenshot Permission Required",
+        "Please choose \"Allow\" once in the system dialog so VeloShot can capture screenshots directly.",
+        "Start automatically at login",
+        "Starts the VeloShot background daemon (tray icon &amp; shortcuts) automatically after reboot",
+        "Autostart enabled",
+        "Autostart disabled",
+        "In Snap mode, please add VeloShot in GNOME Startup Applications.",
+        "Screenshot Permission Denied",
+        "VeloShot is currently not allowed to take screenshots. Please enable Screenshots in GNOME Settings → Apps → VeloShot and try again.",
     ];
 
     #[test]

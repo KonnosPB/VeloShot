@@ -1,6 +1,6 @@
 name: veloshot
 base: core24
-version: "0.1.0"
+version: "0.1.1"
 summary: Fast Ubuntu Wayland screenshot tool with live loupe, carousel & editor
 description: |
   VeloShot is a fast, native screenshot tool for Ubuntu Wayland (GNOME) written

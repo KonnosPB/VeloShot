@@ -78,48 +78,57 @@ async fn load_portal_response(
     Ok(dyn_img.to_rgba8())
 }
 
-/// Captures a fullscreen screenshot using `xdg-desktop-portal`.
+/// Structured error returned by non-interactive fullscreen portal capture.
+#[derive(Debug)]
+pub enum CaptureError {
+    /// The user explicitly cancelled the capture request.
+    Cancelled,
+    /// The portal rejected the non-interactive screenshot (commonly because the app
+    /// has not yet been granted permission and currently has no focused window).
+    PermissionRequired(String),
+    /// Any other portal or image I/O failure.
+    Other(anyhow::Error),
+}
+
+impl std::fmt::Display for CaptureError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            CaptureError::Cancelled => write!(f, "Aufnahme abgebrochen"),
+            CaptureError::PermissionRequired(msg) => {
+                write!(f, "Screenshot-Berechtigung erforderlich: {msg}")
+            }
+            CaptureError::Other(err) => write!(f, "{err}"),
+        }
+    }
+}
+
+fn map_portal_error(err: ashpd::Error) -> CaptureError {
+    match err {
+        ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled) => CaptureError::Cancelled,
+        ashpd::Error::Response(other) => CaptureError::PermissionRequired(other.to_string()),
+        other => CaptureError::Other(other.into()),
+    }
+}
+
+/// Captures a fullscreen screenshot silently using `xdg-desktop-portal`.
 ///
-/// First attempts non-interactive silent capture; if the portal rejects it
-/// (e.g., initial permission needed), falls back to interactive portal mode.
-pub async fn capture_fullscreen_async() -> Result<RgbaImage> {
+/// Never falls back to `interactive(true)` (which would launch the desktop's own
+/// screenshot UI); instead returns [`CaptureError::PermissionRequired`] so the UI
+/// can briefly focus a VeloShot window and let GNOME show the permission dialog.
+pub async fn capture_fullscreen_async() -> std::result::Result<RgbaImage, CaptureError> {
     let started_at = SystemTime::now();
-    let response = match Screenshot::request()
+    let req = Screenshot::request()
         .interactive(false)
         .modal(true)
         .send()
         .await
-    {
-        Ok(req) => match req.response() {
-            Ok(resp) => resp,
-            Err(err) => {
-                if matches!(
-                    err,
-                    ashpd::Error::Response(ashpd::desktop::ResponseError::Cancelled)
-                ) {
-                    return Err(anyhow!("Aufnahme abgebrochen"));
-                }
-                Screenshot::request()
-                    .interactive(true)
-                    .modal(true)
-                    .send()
-                    .await
-                    .context("Portal-Screenshot fehlgeschlagen")?
-                    .response()
-                    .context("Keine Screenshot-Antwort vom Portal erhalten")?
-            }
-        },
-        Err(_) => Screenshot::request()
-            .interactive(true)
-            .modal(true)
-            .send()
-            .await
-            .context("Portal-Screenshot fehlgeschlagen")?
-            .response()
-            .context("Keine Screenshot-Antwort vom Portal erhalten")?,
-    };
+        .map_err(map_portal_error)?;
 
-    load_portal_response(response, started_at).await
+    let response = req.response().map_err(map_portal_error)?;
+
+    load_portal_response(response, started_at)
+        .await
+        .map_err(CaptureError::Other)
 }
 
 /// Captures a window or screen using the interactive GNOME portal dialog.
@@ -147,7 +156,8 @@ pub async fn capture_interactive_async() -> Result<RgbaImage> {
 }
 
 /// Spawns fullscreen capture on the background Tokio runtime and delivers the result on a channel.
-pub fn spawn_capture_async() -> async_channel::Receiver<Result<RgbaImage>> {
+pub fn spawn_capture_async() -> async_channel::Receiver<std::result::Result<RgbaImage, CaptureError>>
+{
     let (tx, rx) = async_channel::bounded(1);
     tokio_runtime().spawn(async move {
         let res = capture_fullscreen_async().await;
@@ -167,7 +177,9 @@ pub fn spawn_interactive_capture_async() -> async_channel::Receiver<Result<RgbaI
 }
 
 /// Waits `delay_secs` seconds and then captures the fullscreen desktop.
-pub fn spawn_delayed_capture_async(delay_secs: u64) -> async_channel::Receiver<Result<RgbaImage>> {
+pub fn spawn_delayed_capture_async(
+    delay_secs: u64,
+) -> async_channel::Receiver<std::result::Result<RgbaImage, CaptureError>> {
     let (tx, rx) = async_channel::bounded(1);
     tokio_runtime().spawn(async move {
         if delay_secs > 0 {

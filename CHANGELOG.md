@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Added GitHub Actions CI (`rustfmt`, `clippy`, `test`, `build`), automated `v*` release workflow, Dependabot, issue/PR templates, and community documentation (`SECURITY.md`, `CONTRIBUTING.md`, `CHANGELOG.md`).
+## [0.1.1] - 2026-11-28
+
+### Added
+- **Start automatically at login:** New toggle in Preferences (`~/.config/autostart/io.github.konnospb.VeloShot.desktop`, localized in all 17 languages) and default XDG autostart setup in `install-local.sh` (opt-out via `--no-autostart`).
+- **CI, Release & Snap Store Automation:** GitHub Actions CI (`rustfmt`, `clippy`, `test`, `build`), automated `v*` release workflow, Snapcraft `core24` build & Snap Store publish workflow, Dependabot, issue/PR templates, and community documentation (`SECURITY.md`, `CONTRIBUTING.md`, `CHANGELOG.md`).
+
+### Changed
+- **Cleaner App & Tray Icons:** Simplified the scalable app icon, symbolic icon, and top-bar tray icon to a bold, full-bleed rounded square with crisp viewfinder brackets and centered aperture ring for sharper legibility at small panel sizes.
+
+### Fixed
+- **Wayland Portal Permission Flow:** Removed the unintended fallback to GNOME's interactive screenshot tool and instead briefly focus a VeloShot permission window when GNOME requires focus for the one-time system access dialog (showing a clear notice with Close button if permission is denied).
+- **Headless `veloshot quit`:** Forward `quit` over GIO D-Bus without initializing GTK4/Libadwaita/GL or spawning the tray service, preventing teardown segmentation faults during `./install-local.sh`.
 
 ## [0.1.0] - 2026-11-27
 

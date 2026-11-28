@@ -1697,6 +1697,102 @@ pub(super) fn translate(lang: ResolvedLang, en: &'static str) -> Option<&'static
             "Comanda de instalare a fost copiată în clipboard",
             "Команду встановлення скопійовано в буфер обміну",
         ),
+        "Screenshot Permission — VeloShot" => pick(
+            lang,
+            "Permissão de captura — VeloShot",
+            "Uprawnienie do zrzutów — VeloShot",
+            "Oprávnění snímku — VeloShot",
+            "Képernyőkép-engedély — VeloShot",
+            "Permisiune captură — VeloShot",
+            "Дозвіл на знімки — VeloShot",
+        ),
+        "Screenshot Permission Required" => pick(
+            lang,
+            "Permissão de captura necessária",
+            "Wymagane uprawnienie do zrzutów",
+            "Vyžadováno oprávnění pro snímky",
+            "Képernyőkép-engedély szükséges",
+            "Este necesară permisiunea de captură",
+            "Потрібен дозвіл на знімки екрана",
+        ),
+        "Please choose \"Allow\" once in the system dialog so VeloShot can capture screenshots directly." => {
+            pick(
+                lang,
+                "Escolha \"Permitir\" uma vez na caixa de diálogo do sistema para que o VeloShot capture diretamente.",
+                "Wybierz raz \"Zezwól\" w oknie systemowym, aby VeloShot mógł wykonywać zrzuty bezpośrednio.",
+                "Zvolte jednou \"Povolit\" v systémovém dialogu, aby VeloShot mohl pořizovat snímky přímo.",
+                "Válassza egyszer az \"Engedélyezés\" gombot a rendszerablakban, hogy a VeloShot közvetlenül készíthessen képernyőképet.",
+                "Alegeți o dată \"Permite\" în dialogul de sistem pentru ca VeloShot să poată captura direct.",
+                "Оберіть один раз \"Дозволити\" у системному діалозі, щоб VeloShot міг робити знімки напряму.",
+            )
+        }
+        "Start automatically at login" => pick(
+            lang,
+            "Iniciar automaticamente ao iniciar sessão",
+            "Uruchamiaj automatycznie przy logowaniu",
+            "Spustit automaticky při přihlášení",
+            "Automatikus indítás bejelentkezéskor",
+            "Pornește automat la autentificare",
+            "Запускати автоматично під час входу",
+        ),
+        "Starts the VeloShot background daemon (tray icon &amp; shortcuts) automatically after reboot" => {
+            pick(
+                lang,
+                "Inicia o serviço VeloShot (ícone &amp; atalhos) automaticamente após reiniciar",
+                "Uruchamia usługę VeloShot (ikona &amp; skróty) automatycznie po restarcie",
+                "Spustí službu VeloShot (ikona &amp; zkratky) automaticky po restartu",
+                "Automatikusan elindítja a VeloShot háttérszolgáltatást (ikon &amp; gyorsbillentyűk) újraindítás után",
+                "Pornește automat serviciul VeloShot (pictogramă &amp; comenzi rapide) după repornire",
+                "Автоматично запускає фонову службу VeloShot (значок &amp; клавіші) після перезавантаження",
+            )
+        }
+        "Autostart enabled" => pick(
+            lang,
+            "Arranque automático ativado",
+            "Autostart włączony",
+            "Automatické spuštění zapnuto",
+            "Automatikus indítás bekapcsolva",
+            "Pornirea automată a fost activată",
+            "Автозапуск увімкнено",
+        ),
+        "Autostart disabled" => pick(
+            lang,
+            "Arranque automático desativado",
+            "Autostart wyłączony",
+            "Automatické spuštění vypnuto",
+            "Automatikus indítás kikapcsolva",
+            "Pornirea automată a fost dezactivată",
+            "Автозапуск вимкнено",
+        ),
+        "In Snap mode, please add VeloShot in GNOME Startup Applications." => pick(
+            lang,
+            "No modo Snap, adicione o VeloShot nas Aplicações de Arranque do GNOME.",
+            "W trybie Snap dodaj VeloShot w Programach startowych GNOME.",
+            "V režimu Snap přidejte VeloShot v Aplikacích spouštěných při přihlášení GNOME.",
+            "Snap módban adja hozzá a VeloShot alkalmazást a GNOME Indítópultban.",
+            "În modul Snap, adăugați VeloShot în Aplicații la pornire GNOME.",
+            "У режимі Snap додайте VeloShot у Автозапуск програм GNOME.",
+        ),
+        "Screenshot Permission Denied" => pick(
+            lang,
+            "Permissão de captura recusada",
+            "Odmowa uprawnień do zrzutów",
+            "Oprávnění pro snímky odepřeno",
+            "Képernyőkép-engedély megtagadva",
+            "Permisiune de captură refuzată",
+            "У дозволі на знімки відмовлено",
+        ),
+        "VeloShot is currently not allowed to take screenshots. Please enable Screenshots in GNOME Settings → Apps → VeloShot and try again." => {
+            pick(
+                lang,
+                "O VeloShot não tem permissão para capturas. Ative Capturas em Definições do GNOME → Aplicações → VeloShot e tente novamente.",
+                "VeloShot nie ma uprawnień do zrzutów ekranu. Włącz Zrzuty ekranu w Ustawieniach GNOME → Aplikacje → VeloShot i spróbuj ponownie.",
+                "VeloShot nemá oprávnění pořizovat snímky. Povolte Snímky obrazovky v Nastavení GNOME → Aplikace → VeloShot a zkuste to znovu.",
+                "A VeloShot jelenleg nem készíthet képernyőképet. Engedélyezze a Képernyőképek opciót a GNOME Beállítások → Alkalmazások → VeloShot alatt, majd próbálja újra.",
+                "VeloShot nu are permisiune pentru capturi. Activați Capturi de ecran în Setări GNOME → Aplicații → VeloShot și încercați din nou.",
+                "VeloShot наразі не має дозволу на знімки екрана. Увімкніть Знімки екрана в Налаштуваннях GNOME → Програми → VeloShot і спробуйте знову.",
+            )
+        }
 
         _ => None,
     }

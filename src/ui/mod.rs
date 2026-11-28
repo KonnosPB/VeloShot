@@ -10,11 +10,16 @@ pub mod preferences;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use gtk4::{CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, gdk, prelude::WidgetExt};
+use gtk4::{
+    CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, gdk,
+    prelude::{BoxExt, ButtonExt, GtkApplicationExt, GtkWindowExt, WidgetExt},
+};
 use libadwaita as adw;
 
-use crate::config::{AfterCaptureAction, AppConfig};
+use crate::capture::CaptureError;
+use crate::config::{APP_ID, AfterCaptureAction, AppConfig};
 use crate::history::{HistoryItem, HistoryStore};
+use crate::i18n::tr;
 
 /// Shared runtime state passed across windows inside the single-instance GTK application.
 #[derive(Clone)]
@@ -311,20 +316,161 @@ pub fn plain_toast(message: &str) -> adw::Toast {
     adw::Toast::new(&gtk4::glib::markup_escape_text(message))
 }
 
-/// Starts a interactive capture flow and executes the configured post-capture action.
+const PERMISSION_WINDOW_NAME: &str = "veloshot-permission-window";
+
+/// Briefly focuses a small VeloShot window so GNOME Shell permits the portal's one-time
+/// screenshot permission dialog ("Only the focused app is allowed to show a system access dialog"),
+/// then closes it and takes a clean silent fullscreen capture.
+fn request_screenshot_permission_and_capture(
+    state: AppState,
+    parent_to_hide: Option<gtk4::Window>,
+) {
+    if let Some(existing) = state
+        .app
+        .windows()
+        .into_iter()
+        .find(|w| w.widget_name() == PERMISSION_WINDOW_NAME)
+    {
+        existing.present();
+        return;
+    }
+
+    let spinner = gtk4::Spinner::builder().spinning(true).build();
+    let status = adw::StatusPage::builder()
+        .icon_name(APP_ID)
+        .css_classes(["compact"])
+        .title(tr(
+            "Screenshot-Berechtigung erforderlich",
+            "Screenshot Permission Required",
+        ))
+        .description(tr(
+            "Bitte im Systemdialog einmalig „Erlauben“ wählen, damit VeloShot Screenshots direkt aufnehmen kann.",
+            "Please choose \"Allow\" once in the system dialog so VeloShot can capture screenshots directly.",
+        ))
+        .child(&spinner)
+        .vexpand(true)
+        .build();
+
+    let content = gtk4::Box::new(gtk4::Orientation::Vertical, 0);
+    content.append(&adw::HeaderBar::new());
+    content.append(&status);
+
+    let perm_win = adw::Window::builder()
+        .application(&state.app)
+        .name(PERMISSION_WINDOW_NAME)
+        .title(tr(
+            "Screenshot-Berechtigung — VeloShot",
+            "Screenshot Permission — VeloShot",
+        ))
+        .default_width(440)
+        .default_height(320)
+        .resizable(false)
+        .content(&content)
+        .build();
+    let esc_ctrl = gtk4::EventControllerKey::new();
+    let perm_win_esc = perm_win.clone();
+    esc_ctrl.connect_key_pressed(move |_, key, _, _| {
+        if key == gdk::Key::Escape {
+            perm_win_esc.close();
+            return gtk4::glib::Propagation::Stop;
+        }
+        gtk4::glib::Propagation::Proceed
+    });
+    perm_win.add_controller(esc_ctrl);
+    perm_win.present();
+
+    let status_ref = status.clone();
+    gtk4::glib::MainContext::default().spawn_local(async move {
+        // Give Wayland / GNOME Shell a brief moment to focus perm_win before requesting portal access
+        gtk4::glib::timeout_future(std::time::Duration::from_millis(220)).await;
+        let rx = crate::capture::spawn_capture_async();
+        let res = rx.recv().await;
+
+        match res {
+            Ok(Ok(first_img)) => {
+                perm_win.close();
+                // Permission is now granted & stored; wait for perm_win to unmap and grab a clean frame
+                gtk4::glib::timeout_future(std::time::Duration::from_millis(160)).await;
+                let clean_rx = crate::capture::spawn_capture_async();
+                let img = match clean_rx.recv().await {
+                    Ok(Ok(clean)) => clean,
+                    _ => first_img,
+                };
+                overlay::open_region_overlay(state, img);
+            }
+            Ok(Err(CaptureError::PermissionRequired(msg))) => {
+                crate::logging::log_warn("Aufnahme", &msg);
+                status_ref.set_title(tr(
+                    "Screenshot-Berechtigung verweigert",
+                    "Screenshot Permission Denied",
+                ));
+                status_ref.set_description(Some(tr(
+                    "VeloShot darf derzeit keine Screenshots aufnehmen. Bitte in den GNOME-Einstellungen → Apps → VeloShot → Screenshots aktivieren und erneut versuchen.",
+                    "VeloShot is currently not allowed to take screenshots. Please enable Screenshots in GNOME Settings → Apps → VeloShot and try again.",
+                )));
+                let close_btn = gtk4::Button::builder()
+                    .label(tr("Schließen", "Close"))
+                    .halign(gtk4::Align::Center)
+                    .css_classes(["suggested-action", "pill"])
+                    .build();
+                let perm_win_close = perm_win.clone();
+                let parent_restore = parent_to_hide.clone();
+                close_btn.connect_clicked(move |_| {
+                    perm_win_close.close();
+                    if let Some(win) = &parent_restore {
+                        win.set_visible(true);
+                    }
+                });
+                status_ref.set_child(Some(&close_btn));
+                perm_win.present();
+            }
+            Ok(Err(CaptureError::Cancelled)) => {
+                perm_win.close();
+                if let Some(win) = &parent_to_hide {
+                    win.set_visible(true);
+                }
+            }
+            Ok(Err(err)) => {
+                perm_win.close();
+                if let Some(win) = &parent_to_hide {
+                    win.set_visible(true);
+                }
+                crate::logging::log_warn("Aufnahme", &err.to_string());
+            }
+            Err(_) => {
+                perm_win.close();
+                if let Some(win) = &parent_to_hide {
+                    win.set_visible(true);
+                }
+            }
+        }
+    });
+}
+
+/// Starts an interactive capture flow and executes the configured post-capture action.
 pub fn trigger_capture_flow(state: AppState, parent_to_hide: Option<gtk4::Window>) {
     if let Some(win) = &parent_to_hide {
         win.set_visible(false);
     }
 
-    let rx = crate::capture::spawn_capture_async();
     gtk4::glib::MainContext::default().spawn_local(async move {
         // Short yield so a hidden parent window finishes unmapping before portal grabs screen
-        gtk4::glib::timeout_future(std::time::Duration::from_millis(120)).await;
+        if parent_to_hide.is_some() {
+            gtk4::glib::timeout_future(std::time::Duration::from_millis(120)).await;
+        }
+        let rx = crate::capture::spawn_capture_async();
         let result = rx.recv().await;
         match result {
             Ok(Ok(full_img)) => {
                 overlay::open_region_overlay(state, full_img);
+            }
+            Ok(Err(CaptureError::PermissionRequired(_))) => {
+                request_screenshot_permission_and_capture(state, parent_to_hide);
+            }
+            Ok(Err(CaptureError::Cancelled)) => {
+                if let Some(win) = &parent_to_hide {
+                    win.set_visible(true);
+                }
             }
             Ok(Err(err)) => {
                 if let Some(win) = &parent_to_hide {
@@ -360,7 +506,11 @@ pub fn trigger_delayed_capture(state: AppState, delay_secs: u64) {
     gtk4::glib::MainContext::default().spawn_local(async move {
         match rx.recv().await {
             Ok(Ok(full_img)) => overlay::open_region_overlay(state, full_img),
-            Ok(Err(err)) => eprintln!("Verzögerte Aufnahme fehlgeschlagen: {err}"),
+            Ok(Err(CaptureError::PermissionRequired(_))) => {
+                request_screenshot_permission_and_capture(state, None);
+            }
+            Ok(Err(CaptureError::Cancelled)) => {}
+            Ok(Err(err)) => crate::logging::log_warn("Verzögerte Aufnahme", &err.to_string()),
             Err(_) => {}
         }
     });

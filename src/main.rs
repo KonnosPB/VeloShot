@@ -1,6 +1,7 @@
 //! VeloShot — Fast, fluid screenshot tool for Ubuntu Wayland (GNOME).
 
 mod annotations;
+mod autostart;
 mod capture;
 mod clipboard;
 mod config;
@@ -102,6 +103,15 @@ fn main() -> ExitCode {
         Some("--version" | "-V") => {
             println!("veloshot {VERSION}");
             return ExitCode::SUCCESS;
+        }
+        Some("quit") => {
+            // Forward `quit` headlessly over GIO D-Bus without initializing GTK4/Libadwaita/GL
+            // or spawning the tray service when no background daemon is running.
+            let app =
+                gio::Application::new(Some(APP_ID), gio::ApplicationFlags::HANDLES_COMMAND_LINE);
+            app.connect_command_line(|_, _| 0);
+            let code = app.run();
+            return ExitCode::from(code.value() as u8);
         }
         Some(cmd)
             if !matches!(
